@@ -275,9 +275,9 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                           .titleLarge
                                                           .override(
                                                             fontFamily: 'Inter',
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
+                                                            color: containerCompaniesRecordList
+                                                                .first
+                                                                .secondaryTextColor,
                                                             fontSize: 30.0,
                                                             letterSpacing: 0.0,
                                                           ),

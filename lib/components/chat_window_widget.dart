@@ -419,8 +419,9 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                                                         ),
                                                                         decoration:
                                                                             BoxDecoration(
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).secondaryBackground,
+                                                                          color: widget
+                                                                              .companyDoc
+                                                                              ?.secondaryTextColor,
                                                                           borderRadius:
                                                                               BorderRadius.circular(22.0),
                                                                         ),

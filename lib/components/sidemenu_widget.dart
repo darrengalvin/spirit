@@ -128,13 +128,13 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                               currentUserEmail,
                               'email@email.com',
                             ),
-                            style:
-                                FlutterFlowTheme.of(context).bodySmall.override(
-                                      fontFamily: 'Readex Pro',
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      letterSpacing: 0.0,
-                                    ),
+                            style: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .override(
+                                  fontFamily: 'Readex Pro',
+                                  color: widget.companyDoc?.secondaryTextColor,
+                                  letterSpacing: 0.0,
+                                ),
                           ),
                         ),
                       ],
@@ -236,8 +236,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                       12.0, 0.0, 0.0, 0.0),
                                   child: Icon(
                                     Icons.account_circle_outlined,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                    color:
+                                        widget.companyDoc?.secondaryTextColor,
                                     size: 20.0,
                                   ),
                                 ),
@@ -254,8 +254,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Readex Pro',
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: widget
+                                                .companyDoc?.secondaryTextColor,
                                             fontSize: 18.0,
                                             letterSpacing: 0.0,
                                           ),
@@ -298,8 +298,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                       12.0, 0.0, 0.0, 0.0),
                                   child: Icon(
                                     Icons.account_circle_outlined,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                    color:
+                                        widget.companyDoc?.secondaryTextColor,
                                     size: 20.0,
                                   ),
                                 ),
@@ -313,8 +313,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Readex Pro',
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: widget
+                                                .companyDoc?.secondaryTextColor,
                                             fontSize: 18.0,
                                             letterSpacing: 0.0,
                                           ),
@@ -512,9 +512,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                               .bodyMedium
                                               .override(
                                                 fontFamily: 'Readex Pro',
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .secondaryText,
+                                                color: widget.companyDoc
+                                                    ?.secondaryTextColor,
                                                 letterSpacing: 0.0,
                                               ),
                                         ),
