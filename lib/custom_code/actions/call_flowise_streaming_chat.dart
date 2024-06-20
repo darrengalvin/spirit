@@ -134,7 +134,7 @@ Future callFlowiseStreamingChat(
   try {
     var response = await http.post(
       Uri.parse(
-          'https://yourcaio.co.uk:8445/api/v1/prediction/ba6576fd-0766-4399-8039-c1822a28ba1f'),
+          'https://yourcaio.co.uk:8445/api/v1/prediction/498d1d81-0e78-4e9d-90db-e9d511339dc5'),
       headers: {
         'Content-Type': 'application/json',
       },
