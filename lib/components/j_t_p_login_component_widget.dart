@@ -112,7 +112,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                   textAlign: TextAlign.center,
                   style: FlutterFlowTheme.of(context).displaySmall.override(
                         fontFamily: 'Outfit',
-                        color: FlutterFlowTheme.of(context).primary,
+                        color: const Color(0xFF30F7F9),
                         letterSpacing: 0.0,
                       ),
                 ),
@@ -123,6 +123,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                     textAlign: TextAlign.center,
                     style: FlutterFlowTheme.of(context).labelMedium.override(
                           fontFamily: 'Readex Pro',
+                          color: Colors.white,
                           letterSpacing: 0.0,
                         ),
                   ),
@@ -179,7 +180,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                       ),
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
                             fontFamily: 'Readex Pro',
-                            color: FlutterFlowTheme.of(context).primary,
+                            color: const Color(0xFF30F7F9),
                             letterSpacing: 0.0,
                           ),
                       keyboardType: TextInputType.emailAddress,
@@ -254,7 +255,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                       ),
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
                             fontFamily: 'Readex Pro',
-                            color: FlutterFlowTheme.of(context).primary,
+                            color: const Color(0xFF30F7F9),
                             letterSpacing: 0.0,
                           ),
                       validator: _model.passwordTextControllerValidator
@@ -328,7 +329,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                       ),
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
                             fontFamily: 'Readex Pro',
-                            color: FlutterFlowTheme.of(context).primary,
+                            color: const Color(0xFF30F7F9),
                             letterSpacing: 0.0,
                           ),
                       validator: _model.passwordConfirmTextControllerValidator

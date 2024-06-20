@@ -538,8 +538,8 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Readex Pro',
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
+                                        color:
+                                            widget.companyDoc?.primaryTextColor,
                                         fontSize: 18.0,
                                         letterSpacing: 0.0,
                                       ),

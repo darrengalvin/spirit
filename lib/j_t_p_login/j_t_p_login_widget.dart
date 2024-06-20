@@ -40,7 +40,7 @@ class _JTPLoginWidgetState extends State<JTPLoginWidget> {
           : FocusScope.of(context).unfocus(),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: const Color(0xFF00242E),
         body: SafeArea(
           top: true,
           child: Align(
@@ -73,37 +73,20 @@ class _JTPLoginWidgetState extends State<JTPLoginWidget> {
                       Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Text(
-                            'Spirit  Knows',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Reem Kufi Fun',
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontSize: 55.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 15.0),
-                            child: Text(
-                              'A Knowledge base for the off shore winds industry.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Reem Kufi Fun',
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    fontSize: 22.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                            ),
-                          ),
                           SizedBox(
                             width: 500.0,
                             child: Divider(
                               thickness: 2.0,
                               color: FlutterFlowTheme.of(context).accent4,
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset(
+                              'assets/images/spirit.png',
+                              width: 300.0,
+                              height: 200.0,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ],
