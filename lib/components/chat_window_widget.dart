@@ -420,7 +420,7 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                                                         decoration:
                                                                             BoxDecoration(
                                                                           color:
-                                                                              FlutterFlowTheme.of(context).alternate,
+                                                                              FlutterFlowTheme.of(context).secondaryBackground,
                                                                           borderRadius:
                                                                               BorderRadius.circular(22.0),
                                                                         ),
@@ -482,7 +482,7 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                                                         decoration:
                                                                             BoxDecoration(
                                                                           color:
-                                                                              FlutterFlowTheme.of(context).tertiary,
+                                                                              Colors.white,
                                                                           borderRadius:
                                                                               BorderRadius.circular(22.0),
                                                                         ),

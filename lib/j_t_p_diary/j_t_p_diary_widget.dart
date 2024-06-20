@@ -242,7 +242,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                             border: Border.all(
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .secondary,
+                                                      .primaryText,
                                               width: 2.0,
                                             ),
                                           ),
@@ -277,7 +277,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                             fontFamily: 'Inter',
                                                             color: FlutterFlowTheme
                                                                     .of(context)
-                                                                .primary,
+                                                                .secondaryText,
                                                             fontSize: 30.0,
                                                             letterSpacing: 0.0,
                                                           ),

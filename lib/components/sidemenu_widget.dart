@@ -128,13 +128,13 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                               currentUserEmail,
                               'email@email.com',
                             ),
-                            style: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .override(
-                                  fontFamily: 'Readex Pro',
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  letterSpacing: 0.0,
-                                ),
+                            style:
+                                FlutterFlowTheme.of(context).bodySmall.override(
+                                      fontFamily: 'Readex Pro',
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
+                                    ),
                           ),
                         ),
                       ],
@@ -236,7 +236,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                       12.0, 0.0, 0.0, 0.0),
                                   child: Icon(
                                     Icons.account_circle_outlined,
-                                    color: FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
                                     size: 20.0,
                                   ),
                                 ),
@@ -254,7 +255,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                           .override(
                                             fontFamily: 'Readex Pro',
                                             color: FlutterFlowTheme.of(context)
-                                                .primary,
+                                                .secondaryText,
                                             fontSize: 18.0,
                                             letterSpacing: 0.0,
                                           ),
@@ -297,7 +298,8 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                       12.0, 0.0, 0.0, 0.0),
                                   child: Icon(
                                     Icons.account_circle_outlined,
-                                    color: FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
                                     size: 20.0,
                                   ),
                                 ),
@@ -312,7 +314,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                           .override(
                                             fontFamily: 'Readex Pro',
                                             color: FlutterFlowTheme.of(context)
-                                                .primary,
+                                                .secondaryText,
                                             fontSize: 18.0,
                                             letterSpacing: 0.0,
                                           ),
@@ -512,7 +514,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                                 fontFamily: 'Readex Pro',
                                                 color:
                                                     FlutterFlowTheme.of(context)
-                                                        .primary,
+                                                        .secondaryText,
                                                 letterSpacing: 0.0,
                                               ),
                                         ),
@@ -582,7 +584,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                                               fontFamily: 'Readex Pro',
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .primary,
+                                                      .secondaryText,
                                               letterSpacing: 0.0,
                                             ),
                                       ),
