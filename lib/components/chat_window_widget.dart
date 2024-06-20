@@ -44,20 +44,6 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await showDialog(
-        context: context,
-        builder: (alertDialogContext) {
-          return AlertDialog(
-            title: const Text('about to query'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(alertDialogContext),
-                child: const Text('Ok'),
-              ),
-            ],
-          );
-        },
-      );
       _model.checkingForChats = await queryChatsDocumentsRecordOnce(
         queryBuilder: (chatsDocumentsRecord) => chatsDocumentsRecord
             .where(
@@ -68,24 +54,6 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
               'thread_id',
               isEqualTo: valueOrDefault(currentUserDocument?.diaryThread, ''),
             ),
-      );
-      await showDialog(
-        context: context,
-        builder: (alertDialogContext) {
-          return AlertDialog(
-            title: const Text('There are '),
-            content: Text(valueOrDefault<String>(
-              _model.checkingForChats?.length.toString(),
-              '00000000',
-            )),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(alertDialogContext),
-                child: const Text('Ok'),
-              ),
-            ],
-          );
-        },
       );
       await _model.columnOldChats?.animateTo(
         _model.columnOldChats!.position.maxScrollExtent,
@@ -432,7 +400,7 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                                                           child:
                                                                               Padding(
                                                                             padding:
-                                                                                const EdgeInsets.all(8.0),
+                                                                                const EdgeInsets.all(10.0),
                                                                             child:
                                                                                 Text(
                                                                               valueOrDefault<String>(
@@ -494,7 +462,7 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
                                                                           child:
                                                                               Padding(
                                                                             padding:
-                                                                                const EdgeInsets.all(8.0),
+                                                                                const EdgeInsets.all(10.0),
                                                                             child:
                                                                                 Text(
                                                                               valueOrDefault<String>(
