@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437968038949",
+    "project_id": "spiritaeg-hj9gti",
+    "storage_bucket": "spiritaeg-hj9gti.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437968038949:android:0ecd99f0e151218c9363cc",
+        "android_client_info": {
+          "package_name": "com.mycompany.spiritaeg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHypNghq7bbUwHc6n55O0HJjxeafQ6T7I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
