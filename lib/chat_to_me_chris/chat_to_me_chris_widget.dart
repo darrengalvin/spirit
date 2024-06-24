@@ -274,24 +274,39 @@ class _ChatToMeChrisWidgetState extends State<ChatToMeChrisWidget>
                                         Expanded(
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
                                             children: [
                                               Column(
                                                 mainAxisSize: MainAxisSize.max,
                                                 children: [
-                                                  Text(
-                                                    'HEADER CONTENT LIKE LOGO ETC ',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily:
-                                                              'Readex Pro',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primary,
-                                                          letterSpacing: 0.0,
+                                                  if (responsiveVisibility(
+                                                    context: context,
+                                                    phone: false,
+                                                    tablet: false,
+                                                  ))
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(17.0),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                        child: Image.network(
+                                                          getCORSProxyUrl(
+                                                            valueOrDefault<
+                                                                String>(
+                                                              chatToMeChrisCompaniesRecordList
+                                                                  .first
+                                                                  .companyLogo,
+                                                              'https://picsum.photos/seed/699/600',
+                                                            ),
+                                                          ),
+                                                          height: 150.0,
+                                                          fit: BoxFit.cover,
                                                         ),
-                                                  ),
+                                                      ),
+                                                    ),
                                                 ],
                                               ),
                                               if (responsiveVisibility(
