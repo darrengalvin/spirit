@@ -358,7 +358,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                           currentUserDocument?.associatedCompanyId, '');
                       setState(() {});
 
-                      context.pushNamedAuth('JTPCalendarView', context.mounted);
+                      context.pushNamedAuth('chatToMe', context.mounted);
                     },
                     text: 'Sign In',
                     options: FFButtonOptions(
