@@ -505,12 +505,16 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: 650.0,
+                          ),
                           decoration: const BoxDecoration(),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: MediaQuery.sizeOf(context).width * 0.6,
+                                width: MediaQuery.sizeOf(context).width * 0.8,
                                 decoration: const BoxDecoration(),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,

@@ -558,11 +558,7 @@ class _ChatToMeChrisWidgetState extends State<ChatToMeChrisWidget>
                                                                       .height *
                                                                   0.6,
                                                           decoration:
-                                                              BoxDecoration(
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .accent1,
-                                                          ),
+                                                              const BoxDecoration(),
                                                           alignment:
                                                               const AlignmentDirectional(
                                                                   -1.0, 1.0),
