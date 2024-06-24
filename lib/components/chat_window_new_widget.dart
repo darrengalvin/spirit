@@ -329,9 +329,14 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                   .role ==
                                                               'human')
                                                             Container(
+                                                              width: MediaQuery
+                                                                          .sizeOf(
+                                                                              context)
+                                                                      .width *
+                                                                  0.5,
                                                               constraints:
                                                                   const BoxConstraints(
-                                                                minWidth: 300.0,
+                                                                minHeight: 15.0,
                                                               ),
                                                               decoration:
                                                                   BoxDecoration(
@@ -343,40 +348,48 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                         .circular(
                                                                             22.0),
                                                               ),
-                                                              child: Opacity(
-                                                                opacity: 12.0,
-                                                                child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                              10.0),
-                                                                  child: Text(
-                                                                    valueOrDefault<
-                                                                        String>(
-                                                                      chatsDocumentsItem
-                                                                          .text,
-                                                                      'test is here',
-                                                                    ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .end,
-                                                                    style: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyLarge
-                                                                        .override(
-                                                                          fontFamily:
-                                                                              'Inter',
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).primary,
-                                                                          fontSize:
-                                                                              18.0,
-                                                                          letterSpacing:
-                                                                              0.0,
+                                                              child: Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .max,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .end,
+                                                                      children: [
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              12.0,
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(10.0),
+                                                                            child:
+                                                                                Text(
+                                                                              valueOrDefault<String>(
+                                                                                chatsDocumentsItem.text,
+                                                                                'test is here',
+                                                                              ),
+                                                                              textAlign: TextAlign.end,
+                                                                              style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                                                                    fontFamily: 'Inter',
+                                                                                    color: FlutterFlowTheme.of(context).primary,
+                                                                                    fontSize: 18.0,
+                                                                                    letterSpacing: 0.0,
+                                                                                  ),
+                                                                            ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation1']!),
+                                                                          ),
                                                                         ),
-                                                                  ).animateOnPageLoad(
-                                                                      animationsMap[
-                                                                          'textOnPageLoadAnimation1']!),
-                                                                ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ),
                                                         ],
@@ -401,6 +414,15 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                   .role ==
                                                               'ai')
                                                             Container(
+                                                              width: MediaQuery
+                                                                          .sizeOf(
+                                                                              context)
+                                                                      .width *
+                                                                  0.5,
+                                                              constraints:
+                                                                  const BoxConstraints(
+                                                                minHeight: 15.0,
+                                                              ),
                                                               decoration:
                                                                   BoxDecoration(
                                                                 color: Colors
@@ -410,40 +432,48 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                         .circular(
                                                                             22.0),
                                                               ),
-                                                              child: Opacity(
-                                                                opacity: 12.0,
-                                                                child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                              10.0),
-                                                                  child: Text(
-                                                                    valueOrDefault<
-                                                                        String>(
-                                                                      chatsDocumentsItem
-                                                                          .text,
-                                                                      'test is here',
-                                                                    ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .start,
-                                                                    style: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyLarge
-                                                                        .override(
-                                                                          fontFamily:
-                                                                              'Inter',
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).primary,
-                                                                          fontSize:
-                                                                              18.0,
-                                                                          letterSpacing:
-                                                                              0.0,
+                                                              child: Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                children: [
+                                                                  Expanded(
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .max,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              12.0,
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(10.0),
+                                                                            child:
+                                                                                Text(
+                                                                              valueOrDefault<String>(
+                                                                                chatsDocumentsItem.text,
+                                                                                'test is here',
+                                                                              ),
+                                                                              textAlign: TextAlign.start,
+                                                                              style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                                                                    fontFamily: 'Inter',
+                                                                                    color: FlutterFlowTheme.of(context).primary,
+                                                                                    fontSize: 18.0,
+                                                                                    letterSpacing: 0.0,
+                                                                                  ),
+                                                                            ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation2']!),
+                                                                          ),
                                                                         ),
-                                                                  ).animateOnPageLoad(
-                                                                      animationsMap[
-                                                                          'textOnPageLoadAnimation2']!),
-                                                                ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ),
                                                         ],
