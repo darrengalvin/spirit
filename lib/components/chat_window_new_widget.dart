@@ -238,9 +238,7 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
           List<ChatsDocumentsRecord> containerChatsDocumentsRecordList =
               snapshot.data!;
           return Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-            ),
+            decoration: const BoxDecoration(),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -471,7 +469,7 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisSize: MainAxisSize.max,
@@ -482,10 +480,11 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Container(
-                                width: MediaQuery.sizeOf(context).width * 0.8,
+                                width: MediaQuery.sizeOf(context).width * 0.6,
                                 decoration: const BoxDecoration(),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
                                       constraints: const BoxConstraints(
@@ -603,6 +602,7 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                 decoration: const BoxDecoration(),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     FlutterFlowIconButton(
                                       borderColor:
