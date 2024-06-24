@@ -878,21 +878,9 @@ class _ChatToMeChrisWidgetState extends State<ChatToMeChrisWidget>
                                                 .secondary,
                                           ),
                                         ),
-                                        Column(
+                                        const Column(
                                           mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Text(
-                                              'Hello World',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily:
-                                                            'Readex Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ],
+                                          children: [],
                                         ),
                                       ],
                                     ),
