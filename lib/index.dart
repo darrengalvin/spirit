@@ -19,3 +19,5 @@ export '/activity_detailsd_i_a_r_y/activity_detailsd_i_a_r_y_widget.dart'
 export '/j_t_p_settings/j_t_p_settings_widget.dart' show JTPSettingsWidget;
 export '/html_content_page/html_content_page_widget.dart'
     show HtmlContentPageWidget;
+export '/chat_to_me_chris/chat_to_me_chris_widget.dart'
+    show ChatToMeChrisWidget;

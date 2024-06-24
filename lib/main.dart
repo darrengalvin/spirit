@@ -121,11 +121,8 @@ class _NavBarPageState extends State<NavBarPage> {
   Widget build(BuildContext context) {
     final tabs = {
       'JTPTopics': const JTPTopicsWidget(),
-      'JTPDash': const JTPDashWidget(),
-      'JTPCalendarView': const JTPCalendarViewWidget(),
-      'JTPChat': const JTPChatWidget(),
       'chatToMe': const ChatToMeWidget(),
-      'JTPSettings': const JTPSettingsWidget(),
+      'chatToMeChris': const ChatToMeChrisWidget(),
     };
     final currentIndex = tabs.keys.toList().indexOf(_currentPageName);
 
@@ -150,30 +147,6 @@ class _NavBarPageState extends State<NavBarPage> {
           showUnselectedLabels: false,
           type: BottomNavigationBarType.fixed,
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 24.0,
-              ),
-              label: 'Home',
-              tooltip: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 24.0,
-              ),
-              label: 'Home',
-              tooltip: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_outlined,
-                size: 24.0,
-              ),
-              label: 'Home',
-              tooltip: '',
-            ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home_outlined,

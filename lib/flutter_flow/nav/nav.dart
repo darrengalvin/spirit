@@ -97,9 +97,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'JTPDash',
           path: '/jTPDash',
-          builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'JTPDash')
-              : const JTPDashWidget(),
+          builder: (context, params) => const JTPDashWidget(),
         ),
         FFRoute(
           name: 'activityDetails',
@@ -123,9 +121,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'JTPCalendarView',
           path: '/jTPCalendarView',
-          builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'JTPCalendarView')
-              : const JTPCalendarViewWidget(),
+          builder: (context, params) => const JTPCalendarViewWidget(),
         ),
         FFRoute(
           name: 'testpage',
@@ -150,9 +146,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'JTPChat',
           path: '/jTPChat',
-          builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'JTPChat')
-              : const JTPChatWidget(),
+          builder: (context, params) => const JTPChatWidget(),
         ),
         FFRoute(
           name: 'chatToMe',
@@ -183,9 +177,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'JTPSettings',
           path: '/jTPSettings',
-          builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'JTPSettings')
-              : const JTPSettingsWidget(),
+          builder: (context, params) => const JTPSettingsWidget(),
         ),
         FFRoute(
           name: 'htmlContentPage',
@@ -205,6 +197,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               ParamType.Document,
             ),
           ),
+        ),
+        FFRoute(
+          name: 'chatToMeChris',
+          path: '/chatToMeChris',
+          builder: (context, params) => params.isEmpty
+              ? const NavBarPage(initialPage: 'chatToMeChris')
+              : const ChatToMeChrisWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

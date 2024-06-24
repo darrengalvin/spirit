@@ -182,25 +182,6 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
           ),
         ],
       ),
-      'textOnPageLoadAnimation3': AnimationInfo(
-        trigger: AnimationTrigger.onPageLoad,
-        effectsBuilder: () => [
-          FadeEffect(
-            curve: Curves.easeInOut,
-            delay: 240.0.ms,
-            duration: 1960.0.ms,
-            begin: 0.0,
-            end: 1.0,
-          ),
-          SaturateEffect(
-            curve: Curves.easeInOut,
-            delay: 2200.0.ms,
-            duration: 1230.0.ms,
-            begin: 0.0,
-            end: 1.0,
-          ),
-        ],
-      ),
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
@@ -225,333 +206,296 @@ class _ChatWindowWidgetState extends State<ChatWindowWidget>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
+            const Column(
               mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: const AlignmentDirectional(-1.0, 1.0),
-                  child: Container(
-                    height: MediaQuery.sizeOf(context).height * 0.6,
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.sizeOf(context).width * 0.9,
-                    ),
-                    decoration: const BoxDecoration(),
+              children: [],
+            ),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Align(
                     alignment: const AlignmentDirectional(-1.0, 1.0),
-                    child: SingleChildScrollView(
-                      primary: false,
-                      controller: _model.columnPoss,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 15.0, 0.0, 0.0),
-                                child: AuthUserStreamWidget(
-                                  builder: (context) =>
-                                      StreamBuilder<List<ChatsDocumentsRecord>>(
-                                    stream: queryChatsDocumentsRecord(
-                                      queryBuilder: (chatsDocumentsRecord) =>
-                                          chatsDocumentsRecord
-                                              .where(
-                                                'thread_id',
-                                                isEqualTo: valueOrDefault(
-                                                    currentUserDocument
-                                                        ?.diaryThread,
-                                                    ''),
-                                              )
-                                              .where(
-                                                'companyDocId',
-                                                isEqualTo: FFAppState()
-                                                    .selectedCompanyId,
-                                              )
-                                              .where(
-                                                'user_id',
-                                                isEqualTo:
-                                                    currentUserReference?.id,
-                                              )
-                                              .orderBy('created_time'),
-                                    ),
-                                    builder: (context, snapshot) {
-                                      // Customize what your widget looks like when it's loading.
-                                      if (!snapshot.hasData) {
-                                        return Center(
-                                          child: SizedBox(
-                                            width: 50.0,
-                                            height: 50.0,
-                                            child: CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                FlutterFlowTheme.of(context)
-                                                    .primary,
+                    child: Container(
+                      height: MediaQuery.sizeOf(context).height * 0.6,
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width * 0.9,
+                      ),
+                      decoration: const BoxDecoration(),
+                      alignment: const AlignmentDirectional(-1.0, 1.0),
+                      child: SingleChildScrollView(
+                        primary: false,
+                        controller: _model.columnPoss,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 15.0, 0.0, 0.0),
+                                  child: AuthUserStreamWidget(
+                                    builder: (context) => StreamBuilder<
+                                        List<ChatsDocumentsRecord>>(
+                                      stream: queryChatsDocumentsRecord(
+                                        queryBuilder: (chatsDocumentsRecord) =>
+                                            chatsDocumentsRecord
+                                                .where(
+                                                  'thread_id',
+                                                  isEqualTo: valueOrDefault(
+                                                      currentUserDocument
+                                                          ?.diaryThread,
+                                                      ''),
+                                                )
+                                                .where(
+                                                  'companyDocId',
+                                                  isEqualTo: FFAppState()
+                                                      .selectedCompanyId,
+                                                )
+                                                .where(
+                                                  'user_id',
+                                                  isEqualTo:
+                                                      currentUserReference?.id,
+                                                )
+                                                .orderBy('created_time'),
+                                      ),
+                                      builder: (context, snapshot) {
+                                        // Customize what your widget looks like when it's loading.
+                                        if (!snapshot.hasData) {
+                                          return Center(
+                                            child: SizedBox(
+                                              width: 50.0,
+                                              height: 50.0,
+                                              child: CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        List<ChatsDocumentsRecord>
+                                            maxWidthChatsDocumentsRecordList =
+                                            snapshot.data!;
+                                        return Container(
+                                          width: double.infinity,
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 600.0,
+                                            maxHeight: 600.0,
+                                          ),
+                                          decoration: const BoxDecoration(),
+                                          child: Align(
+                                            alignment:
+                                                const AlignmentDirectional(0.0, 1.0),
+                                            child: Padding(
+                                              padding: const EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      16.0, 0.0, 16.0, 0.0),
+                                              child: Builder(
+                                                builder: (context) {
+                                                  final chatsDocuments =
+                                                      maxWidthChatsDocumentsRecordList
+                                                          .toList();
+                                                  return SingleChildScrollView(
+                                                    primary: false,
+                                                    controller:
+                                                        _model.columnOldChats,
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: List.generate(
+                                                          chatsDocuments.length,
+                                                          (chatsDocumentsIndex) {
+                                                        final chatsDocumentsItem =
+                                                            chatsDocuments[
+                                                                chatsDocumentsIndex];
+                                                        return Padding(
+                                                          padding:
+                                                              const EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      20.0),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .end,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Align(
+                                                                alignment:
+                                                                    const AlignmentDirectional(
+                                                                        1.0,
+                                                                        0.0),
+                                                                child: Padding(
+                                                                  padding: const EdgeInsetsDirectional
+                                                                      .fromSTEB(
+                                                                          0.0,
+                                                                          5.0,
+                                                                          0.0,
+                                                                          5.0),
+                                                                  child: Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .end,
+                                                                    children: [
+                                                                      if (chatsDocumentsItem
+                                                                              .role ==
+                                                                          'human')
+                                                                        Container(
+                                                                          constraints:
+                                                                              const BoxConstraints(
+                                                                            minWidth:
+                                                                                300.0,
+                                                                            maxWidth:
+                                                                                450.0,
+                                                                          ),
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                widget.companyDoc?.secondaryTextColor,
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(22.0),
+                                                                          ),
+                                                                          child:
+                                                                              Opacity(
+                                                                            opacity:
+                                                                                12.0,
+                                                                            child:
+                                                                                Padding(
+                                                                              padding: const EdgeInsets.all(10.0),
+                                                                              child: Text(
+                                                                                valueOrDefault<String>(
+                                                                                  chatsDocumentsItem.text,
+                                                                                  'test is here',
+                                                                                ),
+                                                                                textAlign: TextAlign.end,
+                                                                                style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                                                                      fontFamily: 'Inter',
+                                                                                      color: FlutterFlowTheme.of(context).primary,
+                                                                                      fontSize: 18.0,
+                                                                                      letterSpacing: 0.0,
+                                                                                    ),
+                                                                              ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation1']!),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              if (chatsDocumentsItem
+                                                                      .role ==
+                                                                  'ai')
+                                                                Padding(
+                                                                  padding: const EdgeInsetsDirectional
+                                                                      .fromSTEB(
+                                                                          8.0,
+                                                                          15.0,
+                                                                          0.0,
+                                                                          15.0),
+                                                                  child: Row(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .max,
+                                                                    children: [
+                                                                      if (chatsDocumentsItem
+                                                                              .role ==
+                                                                          'ai')
+                                                                        Container(
+                                                                          constraints:
+                                                                              const BoxConstraints(
+                                                                            minWidth:
+                                                                                300.0,
+                                                                            maxWidth:
+                                                                                450.0,
+                                                                          ),
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                Colors.white,
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(22.0),
+                                                                          ),
+                                                                          child:
+                                                                              Opacity(
+                                                                            opacity:
+                                                                                12.0,
+                                                                            child:
+                                                                                Padding(
+                                                                              padding: const EdgeInsets.all(10.0),
+                                                                              child: Text(
+                                                                                valueOrDefault<String>(
+                                                                                  chatsDocumentsItem.text,
+                                                                                  'test is here',
+                                                                                ),
+                                                                                textAlign: TextAlign.start,
+                                                                                style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                                                                      fontFamily: 'Inter',
+                                                                                      color: FlutterFlowTheme.of(context).primary,
+                                                                                      fontSize: 18.0,
+                                                                                      letterSpacing: 0.0,
+                                                                                    ),
+                                                                              ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation2']!),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }),
+                                                    ),
+                                                  ).animateOnPageLoad(animationsMap[
+                                                      'columnOnPageLoadAnimation']!);
+                                                },
                                               ),
                                             ),
                                           ),
                                         );
-                                      }
-                                      List<ChatsDocumentsRecord>
-                                          maxWidthChatsDocumentsRecordList =
-                                          snapshot.data!;
-                                      return Container(
-                                        width: double.infinity,
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 600.0,
-                                          maxHeight: 600.0,
-                                        ),
-                                        decoration: const BoxDecoration(),
-                                        child: Align(
-                                          alignment:
-                                              const AlignmentDirectional(0.0, 1.0),
-                                          child: Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 0.0, 16.0, 0.0),
-                                            child: Builder(
-                                              builder: (context) {
-                                                final chatsDocuments =
-                                                    maxWidthChatsDocumentsRecordList
-                                                        .toList();
-                                                return SingleChildScrollView(
-                                                  primary: false,
-                                                  controller:
-                                                      _model.columnOldChats,
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: List.generate(
-                                                        chatsDocuments.length,
-                                                        (chatsDocumentsIndex) {
-                                                      final chatsDocumentsItem =
-                                                          chatsDocuments[
-                                                              chatsDocumentsIndex];
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    0.0,
-                                                                    0.0,
-                                                                    0.0,
-                                                                    20.0),
-                                                        child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.max,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .end,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Align(
-                                                              alignment:
-                                                                  const AlignmentDirectional(
-                                                                      1.0, 0.0),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            0.0,
-                                                                            5.0,
-                                                                            0.0,
-                                                                            5.0),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .end,
-                                                                  children: [
-                                                                    if (chatsDocumentsItem
-                                                                            .role ==
-                                                                        'human')
-                                                                      Container(
-                                                                        constraints:
-                                                                            const BoxConstraints(
-                                                                          minWidth:
-                                                                              300.0,
-                                                                          maxWidth:
-                                                                              450.0,
-                                                                        ),
-                                                                        decoration:
-                                                                            BoxDecoration(
-                                                                          color: widget
-                                                                              .companyDoc
-                                                                              ?.secondaryTextColor,
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(22.0),
-                                                                        ),
-                                                                        child:
-                                                                            Opacity(
-                                                                          opacity:
-                                                                              12.0,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(10.0),
-                                                                            child:
-                                                                                Text(
-                                                                              valueOrDefault<String>(
-                                                                                chatsDocumentsItem.text,
-                                                                                'test is here',
-                                                                              ),
-                                                                              textAlign: TextAlign.end,
-                                                                              style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                                                                    fontFamily: 'Inter',
-                                                                                    color: FlutterFlowTheme.of(context).primary,
-                                                                                    fontSize: 18.0,
-                                                                                    letterSpacing: 0.0,
-                                                                                  ),
-                                                                            ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation1']!),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            if (chatsDocumentsItem
-                                                                    .role ==
-                                                                'ai')
-                                                              Padding(
-                                                                padding: const EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        8.0,
-                                                                        15.0,
-                                                                        0.0,
-                                                                        15.0),
-                                                                child: Row(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .max,
-                                                                  children: [
-                                                                    if (chatsDocumentsItem
-                                                                            .role ==
-                                                                        'ai')
-                                                                      Container(
-                                                                        constraints:
-                                                                            const BoxConstraints(
-                                                                          minWidth:
-                                                                              300.0,
-                                                                          maxWidth:
-                                                                              450.0,
-                                                                        ),
-                                                                        decoration:
-                                                                            BoxDecoration(
-                                                                          color:
-                                                                              Colors.white,
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(22.0),
-                                                                        ),
-                                                                        child:
-                                                                            Opacity(
-                                                                          opacity:
-                                                                              12.0,
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(10.0),
-                                                                            child:
-                                                                                Text(
-                                                                              valueOrDefault<String>(
-                                                                                chatsDocumentsItem.text,
-                                                                                'test is here',
-                                                                              ),
-                                                                              textAlign: TextAlign.start,
-                                                                              style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                                                                    fontFamily: 'Inter',
-                                                                                    color: FlutterFlowTheme.of(context).primary,
-                                                                                    fontSize: 18.0,
-                                                                                    letterSpacing: 0.0,
-                                                                                  ),
-                                                                            ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation2']!),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    }),
-                                                  ),
-                                                ).animateOnPageLoad(animationsMap[
-                                                    'columnOnPageLoadAnimation']!);
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 600.0,
-                  ),
-                  decoration: const BoxDecoration(),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (FFAppState().flowiseMessages.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    25.0, 0.0, 0.0, 0.0),
-                                child: Text(
-                                  valueOrDefault<String>(
-                                    FFAppState().flowiseMessages.first.message,
-                                    'streaming message',
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyLarge
-                                      .override(
-                                        fontFamily: 'Readex Pro',
-                                        color:
-                                            widget.companyDoc?.primaryTextColor,
-                                        fontSize: 18.0,
-                                        letterSpacing: 0.0,
-                                      ),
-                                ).animateOnPageLoad(
-                                    animationsMap['textOnPageLoadAnimation3']!),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 50.0),
                   child: Container(
