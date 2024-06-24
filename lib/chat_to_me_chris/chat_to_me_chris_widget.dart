@@ -618,7 +618,7 @@ class _ChatToMeChrisWidgetState extends State<ChatToMeChrisWidget>
                                                             MediaQuery.sizeOf(
                                                                         context)
                                                                     .height *
-                                                                0.95,
+                                                                0.75,
                                                         decoration:
                                                             const BoxDecoration(),
                                                         child: wrapWithModel(
