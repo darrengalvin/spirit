@@ -263,80 +263,82 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: TextFormField(
-                      controller: _model.passwordConfirmTextController,
-                      focusNode: _model.passwordConfirmFocusNode,
-                      autofocus: true,
-                      autofillHints: const [AutofillHints.password],
-                      obscureText: !_model.passwordConfirmVisibility,
-                      decoration: InputDecoration(
-                        labelText: 'Confirm Password',
-                        labelStyle:
-                            FlutterFlowTheme.of(context).labelLarge.override(
-                                  fontFamily: 'Readex Pro',
-                                  letterSpacing: 0.0,
-                                ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color:
-                                FlutterFlowTheme.of(context).primaryBackground,
-                            width: 2.0,
+                if (_model.signupReady == true)
+                  Padding(
+                    padding:
+                        const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: TextFormField(
+                        controller: _model.passwordConfirmTextController,
+                        focusNode: _model.passwordConfirmFocusNode,
+                        autofocus: true,
+                        autofillHints: const [AutofillHints.password],
+                        obscureText: !_model.passwordConfirmVisibility,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          labelStyle:
+                              FlutterFlowTheme.of(context).labelLarge.override(
+                                    fontFamily: 'Readex Pro',
+                                    letterSpacing: 0.0,
+                                  ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: FlutterFlowTheme.of(context)
+                                  .primaryBackground,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          borderRadius: BorderRadius.circular(12.0),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: FlutterFlowTheme.of(context).primary,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: FlutterFlowTheme.of(context).alternate,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: FlutterFlowTheme.of(context).alternate,
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          filled: true,
+                          fillColor:
+                              FlutterFlowTheme.of(context).primaryBackground,
+                          suffixIcon: InkWell(
+                            onTap: () => setState(
+                              () => _model.passwordConfirmVisibility =
+                                  !_model.passwordConfirmVisibility,
+                            ),
+                            focusNode: FocusNode(skipTraversal: true),
+                            child: Icon(
+                              _model.passwordConfirmVisibility
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 24.0,
+                            ),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).primary,
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).alternate,
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        filled: true,
-                        fillColor:
-                            FlutterFlowTheme.of(context).primaryBackground,
-                        suffixIcon: InkWell(
-                          onTap: () => setState(
-                            () => _model.passwordConfirmVisibility =
-                                !_model.passwordConfirmVisibility,
-                          ),
-                          focusNode: FocusNode(skipTraversal: true),
-                          child: Icon(
-                            _model.passwordConfirmVisibility
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 24.0,
-                          ),
-                        ),
+                        style: FlutterFlowTheme.of(context).bodyLarge.override(
+                              fontFamily: 'Readex Pro',
+                              color: FlutterFlowTheme.of(context).primary,
+                              letterSpacing: 0.0,
+                            ),
+                        validator: _model.passwordConfirmTextControllerValidator
+                            .asValidator(context),
                       ),
-                      style: FlutterFlowTheme.of(context).bodyLarge.override(
-                            fontFamily: 'Readex Pro',
-                            color: FlutterFlowTheme.of(context).primary,
-                            letterSpacing: 0.0,
-                          ),
-                      validator: _model.passwordConfirmTextControllerValidator
-                          .asValidator(context),
                     ),
                   ),
-                ),
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
                   child: FFButtonWidget(
@@ -470,7 +472,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                         return;
                       }
 
-                      context.goNamedAuth('JTPTopics', context.mounted);
+                      context.goNamedAuth('chatToMe', context.mounted);
                     },
                     text: 'Continue with Google',
                     icon: const FaIcon(
@@ -516,7 +518,7 @@ class _JTPLoginComponentWidgetState extends State<JTPLoginComponentWidget>
                               return;
                             }
 
-                            context.goNamedAuth('JTPTopics', context.mounted);
+                            context.goNamedAuth('chatToMe', context.mounted);
                           },
                           text: 'Continue with Apple',
                           icon: const FaIcon(

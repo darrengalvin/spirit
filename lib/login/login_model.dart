@@ -1,9 +1,9 @@
 import '/components/j_t_p_login_component_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'j_t_p_login_widget.dart' show JTPLoginWidget;
+import 'login_widget.dart' show LoginWidget;
 import 'package:flutter/material.dart';
 
-class JTPLoginModel extends FlutterFlowModel<JTPLoginWidget> {
+class LoginModel extends FlutterFlowModel<LoginWidget> {
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();

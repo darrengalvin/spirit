@@ -2,25 +2,25 @@ import '/components/j_t_p_login_component_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'j_t_p_login_model.dart';
-export 'j_t_p_login_model.dart';
+import 'login_model.dart';
+export 'login_model.dart';
 
-class JTPLoginWidget extends StatefulWidget {
-  const JTPLoginWidget({super.key});
+class LoginWidget extends StatefulWidget {
+  const LoginWidget({super.key});
 
   @override
-  State<JTPLoginWidget> createState() => _JTPLoginWidgetState();
+  State<LoginWidget> createState() => _LoginWidgetState();
 }
 
-class _JTPLoginWidgetState extends State<JTPLoginWidget> {
-  late JTPLoginModel _model;
+class _LoginWidgetState extends State<LoginWidget> {
+  late LoginModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => JTPLoginModel());
+    _model = createModel(context, () => LoginModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }

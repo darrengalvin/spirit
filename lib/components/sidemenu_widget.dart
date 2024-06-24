@@ -213,7 +213,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                         hoverColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         onTap: () async {
-                          context.pushNamed('JTPDiary');
+                          context.pushNamed('chatToMe');
 
                           FFAppState().pageSelected = 'diary';
                           setState(() {});
@@ -479,8 +479,7 @@ class _SidemenuWidgetState extends State<SidemenuWidget> {
                               await authManager.signOut();
                               GoRouter.of(context).clearRedirectLocation();
 
-                              context.pushNamedAuth(
-                                  'JTPCalendarView', context.mounted);
+                              context.pushNamedAuth('login', context.mounted);
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),

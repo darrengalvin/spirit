@@ -74,18 +74,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       errorBuilder: (context, state) =>
-          appStateNotifier.loggedIn ? const NavBarPage() : const JTPLoginWidget(),
+          appStateNotifier.loggedIn ? const NavBarPage() : const LoginWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) =>
-              appStateNotifier.loggedIn ? const NavBarPage() : const JTPLoginWidget(),
+              appStateNotifier.loggedIn ? const NavBarPage() : const LoginWidget(),
         ),
         FFRoute(
-          name: 'JTPLogin',
-          path: '/jTPLogin',
-          builder: (context, params) => const JTPLoginWidget(),
+          name: 'login',
+          path: '/login',
+          builder: (context, params) => const LoginWidget(),
         ),
         FFRoute(
           name: 'JTPTopics',
@@ -155,11 +155,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               : const JTPChatWidget(),
         ),
         FFRoute(
-          name: 'JTPDiary',
-          path: '/jTPDiary',
+          name: 'chatToMe',
+          path: '/chatToMe',
           builder: (context, params) => params.isEmpty
-              ? const NavBarPage(initialPage: 'JTPDiary')
-              : const JTPDiaryWidget(),
+              ? const NavBarPage(initialPage: 'chatToMe')
+              : const ChatToMeWidget(),
         ),
         FFRoute(
           name: 'activityDetailsdIARY',
@@ -377,7 +377,7 @@ class FFRoute {
 
           if (requireAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
-            return '/jTPLogin';
+            return '/login';
           }
           return null;
         },

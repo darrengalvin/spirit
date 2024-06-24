@@ -15,19 +15,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import 'j_t_p_diary_model.dart';
-export 'j_t_p_diary_model.dart';
+import 'chat_to_me_model.dart';
+export 'chat_to_me_model.dart';
 
-class JTPDiaryWidget extends StatefulWidget {
-  const JTPDiaryWidget({super.key});
+class ChatToMeWidget extends StatefulWidget {
+  const ChatToMeWidget({super.key});
 
   @override
-  State<JTPDiaryWidget> createState() => _JTPDiaryWidgetState();
+  State<ChatToMeWidget> createState() => _ChatToMeWidgetState();
 }
 
-class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
+class _ChatToMeWidgetState extends State<ChatToMeWidget>
     with TickerProviderStateMixin {
-  late JTPDiaryModel _model;
+  late ChatToMeModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -36,7 +36,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => JTPDiaryModel());
+    _model = createModel(context, () => ChatToMeModel());
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -158,19 +158,19 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
             ),
           );
         }
-        List<CompaniesRecord> jTPDiaryCompaniesRecordList = snapshot.data!;
+        List<CompaniesRecord> chatToMeCompaniesRecordList = snapshot.data!;
         return GestureDetector(
           onTap: () => _model.unfocusNode.canRequestFocus
               ? FocusScope.of(context).requestFocus(_model.unfocusNode)
               : FocusScope.of(context).unfocus(),
           child: Scaffold(
             key: scaffoldKey,
-            backgroundColor: jTPDiaryCompaniesRecordList.first.primaryColor,
+            backgroundColor: chatToMeCompaniesRecordList.first.primaryColor,
             body: SafeArea(
               top: true,
               child: Container(
                 decoration: BoxDecoration(
-                  color: jTPDiaryCompaniesRecordList.first.primaryColor,
+                  color: chatToMeCompaniesRecordList.first.primaryColor,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -190,7 +190,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                               maxWidth: 260.0,
                             ),
                             decoration: BoxDecoration(
-                              color: jTPDiaryCompaniesRecordList
+                              color: chatToMeCompaniesRecordList
                                   .first.primaryColor,
                             ),
                             child: Column(
@@ -205,7 +205,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                       updateOnChange: true,
                                       child: SidemenuWidget(
                                         companyDoc:
-                                            jTPDiaryCompaniesRecordList.first,
+                                            chatToMeCompaniesRecordList.first,
                                       ),
                                     ),
                                   ],
@@ -223,7 +223,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                     MediaQuery.sizeOf(context).width * 0.8,
                               ),
                               decoration: BoxDecoration(
-                                color: jTPDiaryCompaniesRecordList
+                                color: chatToMeCompaniesRecordList
                                     .first.primaryColor,
                               ),
                               child: Row(
@@ -279,7 +279,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                                   0.0),
                                                       child: Text(
                                                         valueOrDefault<String>(
-                                                          jTPDiaryCompaniesRecordList
+                                                          chatToMeCompaniesRecordList
                                                               .first
                                                               .nameForAiChat,
                                                           'chat',
@@ -292,7 +292,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                             .override(
                                                               fontFamily:
                                                                   'Inter',
-                                                              color: jTPDiaryCompaniesRecordList
+                                                              color: chatToMeCompaniesRecordList
                                                                   .first
                                                                   .secondaryTextColor,
                                                               fontSize: 30.0,
@@ -321,7 +321,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                         child: Image.network(
                                           getCORSProxyUrl(
                                             valueOrDefault<String>(
-                                              jTPDiaryCompaniesRecordList
+                                              chatToMeCompaniesRecordList
                                                   .first.companyLogo,
                                               'https://picsum.photos/seed/186/600',
                                             ),
@@ -344,12 +344,12 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                   height:
                                       MediaQuery.sizeOf(context).height * 0.9,
                                   decoration: BoxDecoration(
-                                    color: jTPDiaryCompaniesRecordList
+                                    color: chatToMeCompaniesRecordList
                                         .first.primaryColor,
                                   ),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: jTPDiaryCompaniesRecordList
+                                      color: chatToMeCompaniesRecordList
                                           .first.primaryColor,
                                     ),
                                     child: Padding(
@@ -454,7 +454,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                                                 true,
                                                                             child:
                                                                                 ChatWindowWidget(
-                                                                              companyDoc: jTPDiaryCompaniesRecordList.first,
+                                                                              companyDoc: chatToMeCompaniesRecordList.first,
                                                                             ),
                                                                           ),
                                                                         ),
@@ -482,7 +482,7 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                   alignment: const AlignmentDirectional(0.0, -1.0),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: jTPDiaryCompaniesRecordList
+                                      color: chatToMeCompaniesRecordList
                                           .first.primaryColor,
                                     ),
                                     child: Column(
@@ -623,12 +623,12 @@ class _JTPDiaryWidgetState extends State<JTPDiaryWidget>
                                                                                               ParamType.DocumentReference,
                                                                                             ),
                                                                                             'companyDoc': serializeParam(
-                                                                                              jTPDiaryCompaniesRecordList.first,
+                                                                                              chatToMeCompaniesRecordList.first,
                                                                                               ParamType.Document,
                                                                                             ),
                                                                                           }.withoutNulls,
                                                                                           extra: <String, dynamic>{
-                                                                                            'companyDoc': jTPDiaryCompaniesRecordList.first,
+                                                                                            'companyDoc': chatToMeCompaniesRecordList.first,
                                                                                           },
                                                                                         );
                                                                                       },

@@ -2,10 +2,10 @@ import '/backend/backend.dart';
 import '/components/chat_window_widget.dart';
 import '/components/sidemenu_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'j_t_p_diary_widget.dart' show JTPDiaryWidget;
+import 'chat_to_me_widget.dart' show ChatToMeWidget;
 import 'package:flutter/material.dart';
 
-class JTPDiaryModel extends FlutterFlowModel<JTPDiaryWidget> {
+class ChatToMeModel extends FlutterFlowModel<ChatToMeWidget> {
   ///  Local state fields for this page.
 
   String selectedMonth = 'August';
@@ -21,7 +21,7 @@ class JTPDiaryModel extends FlutterFlowModel<JTPDiaryWidget> {
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();
-  // Stores action output result for [Firestore Query - Query a collection] action in JTPDiary widget.
+  // Stores action output result for [Firestore Query - Query a collection] action in chatToMe widget.
   CompaniesRecord? companyQuery;
   // Model for sidemenu component.
   late SidemenuModel sidemenuModel;

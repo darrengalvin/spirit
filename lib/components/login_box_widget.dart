@@ -430,7 +430,7 @@ class _LoginBoxWidgetState extends State<LoginBoxWidget> {
                                     }
 
                                     context.pushNamedAuth(
-                                        'JTPLogin', context.mounted);
+                                        'login', context.mounted);
                                   },
                                   text: 'Sign Up',
                                   options: FFButtonOptions(

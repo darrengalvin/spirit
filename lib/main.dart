@@ -107,7 +107,7 @@ class NavBarPage extends StatefulWidget {
 
 /// This is the private State class that goes with NavBarPage.
 class _NavBarPageState extends State<NavBarPage> {
-  String _currentPageName = 'JTPTopics';
+  String _currentPageName = 'chatToMe';
   late Widget? _currentPage;
 
   @override
@@ -124,7 +124,7 @@ class _NavBarPageState extends State<NavBarPage> {
       'JTPDash': const JTPDashWidget(),
       'JTPCalendarView': const JTPCalendarViewWidget(),
       'JTPChat': const JTPChatWidget(),
-      'JTPDiary': const JTPDiaryWidget(),
+      'chatToMe': const ChatToMeWidget(),
       'JTPSettings': const JTPSettingsWidget(),
     };
     final currentIndex = tabs.keys.toList().indexOf(_currentPageName);
