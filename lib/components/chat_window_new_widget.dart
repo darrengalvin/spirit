@@ -329,14 +329,10 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                   .role ==
                                                               'human')
                                                             Container(
-                                                              width: MediaQuery
-                                                                          .sizeOf(
-                                                                              context)
-                                                                      .width *
-                                                                  0.5,
                                                               constraints:
                                                                   const BoxConstraints(
                                                                 minHeight: 15.0,
+                                                                maxWidth: 75.0,
                                                               ),
                                                               decoration:
                                                                   BoxDecoration(
@@ -352,6 +348,9 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                 mainAxisSize:
                                                                     MainAxisSize
                                                                         .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .end,
                                                                 children: [
                                                                   Expanded(
                                                                     child:
@@ -414,14 +413,10 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                                                                   .role ==
                                                               'ai')
                                                             Container(
-                                                              width: MediaQuery
-                                                                          .sizeOf(
-                                                                              context)
-                                                                      .width *
-                                                                  0.5,
                                                               constraints:
                                                                   const BoxConstraints(
                                                                 minHeight: 15.0,
+                                                                maxWidth: 75.0,
                                                               ),
                                                               decoration:
                                                                   BoxDecoration(
@@ -505,9 +500,6 @@ class _ChatWindowNewWidgetState extends State<ChatWindowNewWidget>
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Container(
-                          constraints: const BoxConstraints(
-                            maxWidth: 650.0,
-                          ),
                           decoration: const BoxDecoration(),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
