@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your custom styles here */
+.custom-test {
+  background-color: purple;
+  color: white;
+}
