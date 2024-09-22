@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, Video, BookOpen, FileDown, ArrowRight, ChevronUp, ChevronDown, Send, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronRight, Video, BookOpen, FileDown, ArrowRight, ChevronUp, ChevronDown, Send, Menu, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -133,7 +133,7 @@ const backgroundImages = [
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968780/windfarms/Offshore_wind_port_dt3aef.png",
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968780/windfarms/Offshore_wind_workforce_photo_jni2pm.png",
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_Wind_Substation_ynraud.png",
-  "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_wind_Vessel_photo_lufka3.png",
+  "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_Wind_Vessel_photo_lufka3.png",
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_wind_maintenance_photo_zgmlwl.png",
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_wind_foundation_photo_sskion.png",
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_Wind_Turbine_Generator_ztpavk.png"
@@ -141,25 +141,49 @@ const backgroundImages = [
 
 const ChatBox = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    { text: "Welcome! I'm your Offshore Wind Expert. How can I assist you today?", sender: 'ai' }
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
 
   const handleSend = async () => {
     if (input.trim()) {
-      setMessages(prev => [...prev, { text: input, sender: 'user' }]);
+      const userMessage = { text: input, sender: 'user' };
+      setMessages(prev => [...prev, userMessage]);
       setInput('');
       setIsLoading(true);
 
       try {
-        const response = await axios.post('/api/gpt4o', {
-          prompt: `You are an expert on offshore wind farms. Please provide a concise and informative answer to the following question: ${input}`
+        const response = await fetch('/api/gpt4o', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: `You are an expert on offshore wind farms. Please provide a concise and informative answer to the following question: ${input}`
+          }),
         });
 
-        setMessages(prev => [...prev, { text: response.data.message, sender: 'ai' }]);
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        const data = await response.json();
+        setMessages(prev => [...prev, { text: data.message, sender: 'ai' }]);
       } catch (error) {
         console.error('Failed to get AI response:', error);
-        setMessages(prev => [...prev, { text: "I'm sorry, I couldn't process your request at the moment. Please try again later.", sender: 'ai' }]);
+        setMessages(prev => [
+          ...prev, 
+          { text: "I'm sorry, I couldn't process your request at the moment. Please try again later.", sender: 'ai' }
+        ]);
       } finally {
         setIsLoading(false);
       }
@@ -176,8 +200,10 @@ const ChatBox = () => {
       }}
       transition={{ duration: 0.3 }}
     >
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 flex justify-between items-center text-white cursor-pointer"
-           onClick={() => setIsExpanded(!isExpanded)}>
+      <div 
+        className="bg-blue-600 p-4 flex justify-between items-center text-white cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-center">
           <MessageCircle size={24} className="mr-2" />
           <h3 className="font-semibold">Offshore Wind Expert</h3>
@@ -187,12 +213,12 @@ const ChatBox = () => {
         </button>
       </div>
       {isExpanded && (
-        <div className="flex flex-col h-full bg-gray-100">
+        <div className="flex flex-col h-[440px]">
           <div className="flex-grow overflow-y-auto p-4 space-y-4">
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-3/4 p-3 rounded-lg ${
-                  msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'
+                <div className={`max-w-[70%] p-3 rounded-lg ${
+                  msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
                 }`}>
                   {msg.text}
                 </div>
@@ -200,25 +226,26 @@ const ChatBox = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white text-gray-800 p-3 rounded-lg">
+                <div className="bg-gray-200 text-gray-800 p-3 rounded-lg">
                   <span className="animate-pulse">Thinking...</span>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
-          <div className="p-4 bg-gray-200 border-t">
+          <div className="p-4 bg-gray-100 border-t">
             <div className="flex items-center bg-white rounded-full shadow-inner">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about offshore wind..."
-                className="flex-grow p-3 bg-transparent focus:outline-none text-gray-800"
+                className="flex-grow p-3 bg-transparent focus:outline-none rounded-l-full"
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               />
               <button 
                 onClick={handleSend}
-                className="p-3 text-blue-600 hover:text-blue-800 transition-colors duration-300"
+                className="p-3 text-blue-600 hover:text-blue-800 transition-colors duration-300 rounded-r-full"
                 disabled={isLoading}
               >
                 <Send size={20} />
@@ -241,6 +268,7 @@ const TopicExplorer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState(0);
   const [isGeneratingPairs, setIsGeneratingPairs] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     generateExplorationPairs(currentTopic.title);
@@ -260,9 +288,21 @@ const TopicExplorer = () => {
 
     try {
       console.log('Sending API request for exploration pairs');
-      const response = await axios.post('/api/gpt4o', { prompt });
-      console.log('API response for exploration pairs:', response.data);
-      const pairs = parsePairs(response.data.message);
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const data = await response.json();
+      console.log('API response for exploration pairs:', data.message);
+      const pairs = parsePairs(data.message);
       setExplorationPairs(pairs);
     } catch (error) {
       console.error('Failed to generate exploration pairs:', error);
@@ -273,13 +313,15 @@ const TopicExplorer = () => {
 
   const parsePairs = (text) => {
     console.log('Parsing pairs from text:', text);
-    const lines = text.split('\n');
     const pairs = [];
+    const lines = text.split('\n');
     for (let i = 0; i < lines.length; i += 2) {
       if (lines[i] && lines[i + 1]) {
-        const invitation = lines[i].replace(/^\d+\.\s*[a-z]\)\s*/, '').trim();
-        const question = lines[i + 1].replace(/^\d+\.\s*[a-z]\)\s*/, '').trim();
-        pairs.push({ invitation, question });
+        const invitation = lines[i].replace(/^\d+\.\s*[a-z]\)\s*/, '').replace(/\*\*/g, '').trim();
+        const question = lines[i + 1].replace(/^\d+\.\s*[a-z]\)\s*/, '').replace(/\*\*/g, '').trim();
+        if (invitation && question) {
+          pairs.push({ invitation, question });
+        }
       }
     }
     console.log('Parsed pairs:', pairs);
@@ -297,6 +339,7 @@ const TopicExplorer = () => {
     console.log('Generating content for pair:', pair);
     setIsLoading(true);
     setLoadingStage(0);
+    setContent(''); // Clear existing content
 
     const prompt = `${pair.invitation} Context: ${pair.question}
 
@@ -307,10 +350,22 @@ const TopicExplorer = () => {
     try {
       setLoadingStage(1); // Move to "Gathering information" stage
       console.log('Sending API request for content generation');
-      const response = await axios.post('/api/gpt4o', { prompt });
-      console.log('API response for content generation:', response.data);
+      
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const data = await response.json();
       setLoadingStage(2); // Move to "Compiling insights" stage
-      setContent(response.data.message);
+      setContent(data.message.replace(/\*\*/g, '')); // Remove asterisks from content
     } catch (error) {
       console.error('Failed to generate content:', error);
     } finally {
@@ -447,20 +502,58 @@ const TopicExplorer = () => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gray-100">
       {/* Fixed Header */}
-      <header className="bg-[#1c2636] text-white p-2 shadow-md z-10">
+      <header className="bg-[#1c2636] text-white p-2 shadow-md z-20 flex justify-between items-center">
         <h1 className="text-xl lg:text-2xl font-bold">Offshore Wind Farm Explorer</h1>
+        <button 
+          className="md:hidden"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          <Menu size={24} />
+        </button>
       </header>
 
       {/* ChatBox */}
       <ChatBox />
 
       {/* Content Area */}
-      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
-        {/* Left Content Area */}
-        <div className="w-full lg:w-2/3 overflow-y-auto p-4 lg:p-6">
-          {/* Main Content */}
+      <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-gray-800 bg-opacity-75 z-30 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <div className="w-3/4 h-full bg-white p-4" onClick={(e) => e.stopPropagation()}>
+                <h2 className="text-xl font-bold mb-4">Topics</h2>
+                <ul className="space-y-2">
+                  {topics.map((topic, index) => (
+                    <li key={index}>
+                      <button
+                        onClick={() => {
+                          handleTopicChange(topic);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full text-left p-2 rounded hover:bg-gray-100"
+                      >
+                        {topic.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main Content */}
+        <div className="w-full md:w-2/3 overflow-y-auto p-4 md:p-6">
           <motion.div
-            className="bg-white p-4 lg:p-6 rounded-lg shadow-lg mb-4 lg:mb-6"
+            className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-4 md:mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -513,7 +606,7 @@ const TopicExplorer = () => {
           </motion.div>
 
           {/* Additional Resources */}
-          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-lg mb-4 lg:mb-6">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-4 md:mb-6">
             <h3 className="text-lg lg:text-xl font-semibold mb-2 lg:mb-3 text-[#1c2636]">Additional Resources</h3>
             {Object.entries(currentTopic.resources).map(([type, items]) => (
               <div key={type} className="mb-4">
@@ -533,13 +626,16 @@ const TopicExplorer = () => {
           </div>
         </div>
 
-        {/* Right Image Area */}
-        <div className="w-full lg:w-1/3 relative">
-          <div className="h-64 lg:h-full relative">
+        {/* Right Image Area - Hide on mobile */}
+        <div className="hidden md:block w-1/3 relative">
+          <div className="h-full relative">
             <div 
               className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
               style={{ 
                 backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                imageRendering: 'crisp-edges'
               }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-30" />

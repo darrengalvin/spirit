@@ -1,31 +1,28 @@
 import { NextResponse } from 'next/server';
-import axios from 'axios';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();
 
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-4',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 500, // Increased from 150 to 500
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+      stream: false,
+    });
 
-    return NextResponse.json({ message: response.data.choices[0].message.content });
+    return NextResponse.json({ message: response.choices[0].message.content });
   } catch (error) {
+    console.error('Failed to communicate with GPT-4 API:', error);
     return NextResponse.json({ error: 'Failed to communicate with GPT-4 API' }, { status: 500 });
   }
 }

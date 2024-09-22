@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, ChevronRight, ChevronLeft } from 'lucide-react';
@@ -7,27 +7,43 @@ import { BookOpen, ChevronRight, ChevronLeft } from 'lucide-react';
 export default function SpiritSideMenu({ onExpand }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleMouseEnter = () => {
-    if (!isPinned) {
+    if (!isPinned && !isMobile) {
       setIsExpanded(true);
       onExpand(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isPinned) {
+    if (!isPinned && !isMobile) {
       setIsExpanded(false);
       onExpand(false);
     }
   };
 
   const togglePin = () => {
-    setIsPinned(!isPinned);
-    setIsExpanded(!isPinned);
-    onExpand(!isPinned);
+    if (!isMobile) {
+      setIsPinned(!isPinned);
+      setIsExpanded(!isPinned);
+      onExpand(!isPinned);
+    }
   };
+
+  if (isMobile) {
+    return null; // Hide the side menu on mobile
+  }
 
   return (
     <nav 
