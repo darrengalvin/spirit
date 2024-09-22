@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Video, BookOpen, FileDown, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronRight, Video, BookOpen, FileDown, ArrowRight } from 'lucide-react';
 
 const topics = [
   {
@@ -140,33 +140,11 @@ const backgroundImages = [
 const TopicExplorer = () => {
   const [currentTopic, setCurrentTopic] = useState(topics[0]);
   const [currentSubtopic, setCurrentSubtopic] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const chatEndRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSend = () => {
-    if (input.trim()) {
-      setMessages([...messages, { text: input, sender: 'user' }]);
-      // Simulate AI response (replace with actual AI integration)
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          text: `Here's some information about ${input} related to ${currentTopic.title}...`, 
-          sender: 'ai' 
-        }]);
-      }, 1000);
-      setInput('');
-    }
-  };
-
   const handleSubtopicClick = (subtopic) => {
     setCurrentSubtopic(subtopic);
-    setMessages([]);
     changeBackgroundImage();
   };
 
@@ -188,156 +166,103 @@ const TopicExplorer = () => {
     if (currentSubtopic) {
       return (
         <>
-          <h2 className="text-3xl font-semibold mb-6 text-white">{currentSubtopic.title}</h2>
-          <p className="text-white text-lg leading-relaxed mb-4">{currentSubtopic.description}</p>
+          <h2 className="text-2xl font-semibold mb-4 text-[#1c2636]">{currentSubtopic.title}</h2>
+          <p className="text-[#1c2636] text-base leading-relaxed mb-4">{currentSubtopic.description}</p>
           <div className="mt-4">
-            <h3 className="text-xl font-semibold mb-2 text-white">Content:</h3>
-            <p className="text-white">{currentSubtopic.content}</p>
+            <h3 className="text-xl font-semibold mb-2 text-[#1c2636]">Content:</h3>
+            <p className="text-[#1c2636]">{currentSubtopic.content}</p>
           </div>
         </>
       );
     } else {
       return (
         <>
-          <h2 className="text-3xl font-semibold mb-6 text-[#1c2636]">{currentTopic.title}</h2>
-          <p className="text-[#1c2636] text-lg leading-relaxed mb-8">{currentTopic.content}</p>
+          <h2 className="text-2xl font-semibold mb-4 text-[#1c2636]">{currentTopic.title}</h2>
+          <p className="text-[#1c2636] text-base leading-relaxed mb-4">{currentTopic.content}</p>
         </>
       );
     }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
-        style={{ backgroundImage: `url(${backgroundImages[currentImageIndex]})` }}
-      />
-      <div className="absolute inset-0 bg-black bg-opacity-50" />
+    <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
+      {/* Fixed Header */}
+      <header className="bg-[#1c2636] text-white p-4 shadow-md z-10">
+        <h1 className="text-2xl lg:text-3xl font-bold">Offshore Wind Farm Explorer</h1>
+      </header>
 
-      {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        <header className="bg-[#1c2636] text-white p-4">
-          <h1 className="text-3xl font-bold">Offshore Wind Farm Explorer</h1>
-        </header>
-
-        <div className="flex-grow flex p-8">
+      {/* Content Area */}
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        {/* Left Content Area */}
+        <div className="w-full lg:w-2/3 overflow-y-auto p-4 lg:p-8">
           {/* Main Content */}
-          <div className="w-3/4 pr-8">
-          <div className="bg-white bg-opacity-50 p-8 rounded-lg shadow-lg backdrop-blur-sm">
-{renderContent()}
-
-              {/* Additional Resources Section */}
-              <div className="mt-8 border-t pt-6">
-                <h3 className="text-2xl font-semibold mb-4 text-[#1c2636]">Additional Resources</h3>
-                
-                {/* Videos */}
-                <div className="mb-6">
-                  <h4 className="text-xl font-semibold mb-2 flex items-center">
-                    <Video className="mr-2" /> Videos to Watch
-                  </h4>
-                  <ul className="list-disc list-inside">
-                    {currentTopic.resources.videos.map((video, index) => (
-                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{video}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                {/* Courses */}
-                <div className="mb-6">
-                  <h4 className="text-xl font-semibold mb-2 flex items-center">
-                    <BookOpen className="mr-2" /> Course Content
-                  </h4>
-                  <ul className="list-disc list-inside">
-                    {currentTopic.resources.courses.map((course, index) => (
-                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{course}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                {/* Downloads */}
-                <div>
-                  <h4 className="text-xl font-semibold mb-2 flex items-center">
-                    <FileDown className="mr-2" /> Files to Download
-                  </h4>
-                  <ul className="list-disc list-inside">
-                    {currentTopic.resources.downloads.map((file, index) => (
-                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{file}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Chat Interface */}
-            <div className="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 h-96 flex flex-col mt-8">
-              <h3 className="text-2xl font-semibold mb-4 text-[#1c2636]">Ask Questions</h3>
-              <div className="flex-grow overflow-y-auto mb-4">
-                {messages.map((msg, index) => (
-                  <div key={index} className={`mb-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                    <span className={`inline-block p-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                      {msg.text}
-                    </span>
-                  </div>
+          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-lg mb-4 lg:mb-8">
+            {renderContent()}
+            
+            <div className="mt-4 lg:mt-8">
+              <h3 className="text-lg lg:text-xl font-semibold mb-2 lg:mb-3 text-[#1c2636]">Deep Dive</h3>
+              <ul className="space-y-2">
+                {currentTopic.subtopics.map((subtopic, index) => (
+                  <li key={index}>
+                    <button
+                      onClick={() => handleSubtopicClick(subtopic)}
+                      className="w-full text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-300 p-2 rounded shadow text-sm lg:text-base"
+                    >
+                      <span className="font-medium text-blue-800">
+                        {`Deep dive into ${subtopic.title.toLowerCase()}`}
+                      </span>
+                    </button>
+                  </li>
                 ))}
-                <div ref={chatEndRef} />
-              </div>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Type your question here..."
-                  className="flex-grow border rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={handleSend}
-                  className="bg-blue-500 text-white p-2 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <Send size={24} />
-                </button>
-              </div>
+              </ul>
             </div>
           </div>
+
+          {/* Additional Resources */}
+          <div className="bg-white p-4 lg:p-6 rounded-lg shadow-lg mb-4 lg:mb-8">
+            <h3 className="text-lg lg:text-2xl font-semibold mb-2 lg:mb-4 text-[#1c2636]">Additional Resources</h3>
+            {Object.entries(currentTopic.resources).map(([type, items]) => (
+              <div key={type} className="mb-4">
+                <h4 className="text-base lg:text-lg font-semibold mb-2 flex items-center text-[#1c2636]">
+                  {type === 'videos' && <Video className="mr-2" size={18} />}
+                  {type === 'courses' && <BookOpen className="mr-2" size={18} />}
+                  {type === 'downloads' && <FileDown className="mr-2" size={18} />}
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </h4>
+                <ul className="space-y-1">
+                  {items.map((item, index) => (
+                    <li key={index} className="text-blue-600 hover:underline cursor-pointer text-sm lg:text-base">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Image Area */}
+        <div className="w-full lg:w-1/3 relative">
+          <div className="h-64 lg:h-full relative">
+            <div 
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+              style={{ 
+                backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+              }}
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-30" />
+          </div>
           
-        {/* Deep Dive and Next Topic */}
-<div className="w-1/4">
-  <h3 className="text-2xl font-semibold mb-4 text-white">Explore Further</h3>
-  <div className="space-y-6">
-    {/* Deep Dive Options */}
-    <div>
-      <h4 className="text-xl font-semibold mb-3 text-white">Deep Dive</h4>
-      <ul className="space-y-3">
-        {currentTopic.subtopics.map((subtopic, index) => (
-          <li key={index}>
+          {/* Enhanced Next Topic Card */}
+          <div className="absolute bottom-0 left-0 right-0 bg-green-100 p-4 lg:p-6">
+            <h3 className="text-lg lg:text-xl font-semibold mb-2 text-green-800">Ready to Explore More?</h3>
+            <p className="text-green-700 mb-4 text-sm lg:text-base">Dive into the next exciting topic in offshore wind farming.</p>
             <button
-              onClick={() => handleSubtopicClick(subtopic)}
-              className="w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-3 rounded shadow"
+              onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
+              className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300 flex items-center justify-center text-sm lg:text-base"
             >
-              <span className="font-medium">
-                {subtopic.title === "Types of offshore wind foundations"
-                  ? "Explore the foundations of offshore winds"
-                  : `Deep dive into ${subtopic.title.toLowerCase()}`}
-              </span>
+              <span className="mr-2">Explore Next Topic</span>
+              <ArrowRight size={20} />
             </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-    
-    {/* Next Topic */}
-    <div>
-      <h4 className="text-xl font-semibold mb-3 text-white">Next Topic</h4>
-      <button
-        onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
-        className="w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-3 rounded shadow"
-      >
-        <span className="font-medium">Explore Substations</span>
-      </button>
-    </div>
-  </div>
-</div>
+          </div>
         </div>
       </div>
     </div>
