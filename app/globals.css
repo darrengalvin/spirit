@@ -7,3 +7,25 @@
 body {
   @apply font-sans;
 }
+
+/* Add these styles to your existing globals.css */
+
+.prose h1 {
+  @apply text-2xl font-bold mb-4 text-[#1c2636];
+}
+
+.prose h2 {
+  @apply text-xl font-semibold mb-3 text-[#1c2636];
+}
+
+.prose p {
+  @apply text-base mb-4 text-[#1c2636];
+}
+
+.prose ul {
+  @apply list-disc list-inside mb-4;
+}
+
+.prose li {
+  @apply mb-2 text-[#1c2636];
+}
