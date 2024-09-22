@@ -166,35 +166,41 @@ const TopicExplorer = () => {
 
   const handleSubtopicClick = (subtopic) => {
     setCurrentSubtopic(subtopic);
-    setMessages([]); // Clear chat messages when changing subtopics
+    setMessages([]);
+    changeBackgroundImage();
   };
 
   const handleTopicChange = (topic) => {
     setCurrentTopic(topic);
+    setCurrentSubtopic(null);
+    changeBackgroundImage();
+  };
+
+  const changeBackgroundImage = () => {
     setIsTransitioning(true);
     setTimeout(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
       setIsTransitioning(false);
-    }, 500); // Half of the transition duration
+    }, 500);
   };
 
   const renderContent = () => {
     if (currentSubtopic) {
       return (
         <>
-          <h2 className="text-3xl font-semibold mb-6 text-[#1c2636]">{currentSubtopic.title}</h2>
-          <p className="text-gray-700 text-lg leading-relaxed mb-4">{currentSubtopic.description}</p>
+          <h2 className="text-3xl font-semibold mb-6 text-white">{currentSubtopic.title}</h2>
+          <p className="text-white text-lg leading-relaxed mb-4">{currentSubtopic.description}</p>
           <div className="mt-4">
-            <h3 className="text-xl font-semibold mb-2">Content:</h3>
-            <p className="text-gray-700">{currentSubtopic.content}</p>
+            <h3 className="text-xl font-semibold mb-2 text-white">Content:</h3>
+            <p className="text-white">{currentSubtopic.content}</p>
           </div>
         </>
       );
     } else {
       return (
         <>
-          <h2 className="text-3xl font-semibold mb-6 text-[#1c2636]">{currentTopic.title}</h2>
-          <p className="text-gray-700 text-lg leading-relaxed mb-8">{currentTopic.content}</p>
+          <h2 className="text-3xl font-semibold mb-6 text-white">{currentTopic.title}</h2>
+          <p className="text-white text-lg leading-relaxed mb-8">{currentTopic.content}</p>
         </>
       );
     }
@@ -207,7 +213,7 @@ const TopicExplorer = () => {
         className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
         style={{ backgroundImage: `url(${backgroundImages[currentImageIndex]})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent opacity-70" />
+      <div className="absolute inset-0 bg-black bg-opacity-50" />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
@@ -218,52 +224,53 @@ const TopicExplorer = () => {
         <div className="flex-grow flex p-8">
           {/* Main Content */}
           <div className="w-3/4 pr-8">
-            <h2 className="text-4xl font-bold mb-4 text-white">{currentTopic.title}</h2>
-            <p className="text-lg mb-8 text-white">{currentTopic.content}</p>
+            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg">
+              {renderContent()}
 
-            {/* Additional Resources Section */}
-            <div className="mt-8 border-t pt-6">
-              <h3 className="text-2xl font-semibold mb-4 text-[#1c2636]">Additional Resources</h3>
-              
-              {/* Videos */}
-              <div className="mb-6">
-                <h4 className="text-xl font-semibold mb-2 flex items-center">
-                  <Video className="mr-2" /> Videos to Watch
-                </h4>
-                <ul className="list-disc list-inside">
-                  {currentTopic.resources.videos.map((video, index) => (
-                    <li key={index} className="text-blue-600 hover:underline cursor-pointer">{video}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              {/* Courses */}
-              <div className="mb-6">
-                <h4 className="text-xl font-semibold mb-2 flex items-center">
-                  <BookOpen className="mr-2" /> Course Content
-                </h4>
-                <ul className="list-disc list-inside">
-                  {currentTopic.resources.courses.map((course, index) => (
-                    <li key={index} className="text-blue-600 hover:underline cursor-pointer">{course}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              {/* Downloads */}
-              <div>
-                <h4 className="text-xl font-semibold mb-2 flex items-center">
-                  <FileDown className="mr-2" /> Files to Download
-                </h4>
-                <ul className="list-disc list-inside">
-                  {currentTopic.resources.downloads.map((file, index) => (
-                    <li key={index} className="text-blue-600 hover:underline cursor-pointer">{file}</li>
-                  ))}
-                </ul>
+              {/* Additional Resources Section */}
+              <div className="mt-8 border-t pt-6">
+                <h3 className="text-2xl font-semibold mb-4 text-[#1c2636]">Additional Resources</h3>
+                
+                {/* Videos */}
+                <div className="mb-6">
+                  <h4 className="text-xl font-semibold mb-2 flex items-center">
+                    <Video className="mr-2" /> Videos to Watch
+                  </h4>
+                  <ul className="list-disc list-inside">
+                    {currentTopic.resources.videos.map((video, index) => (
+                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{video}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Courses */}
+                <div className="mb-6">
+                  <h4 className="text-xl font-semibold mb-2 flex items-center">
+                    <BookOpen className="mr-2" /> Course Content
+                  </h4>
+                  <ul className="list-disc list-inside">
+                    {currentTopic.resources.courses.map((course, index) => (
+                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{course}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Downloads */}
+                <div>
+                  <h4 className="text-xl font-semibold mb-2 flex items-center">
+                    <FileDown className="mr-2" /> Files to Download
+                  </h4>
+                  <ul className="list-disc list-inside">
+                    {currentTopic.resources.downloads.map((file, index) => (
+                      <li key={index} className="text-blue-600 hover:underline cursor-pointer">{file}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
 
             {/* Chat Interface */}
-            <div className="bg-white rounded-lg shadow-lg p-6 h-96 flex flex-col">
+            <div className="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 h-96 flex flex-col mt-8">
               <h3 className="text-2xl font-semibold mb-4 text-[#1c2636]">Ask Questions</h3>
               <div className="flex-grow overflow-y-auto mb-4">
                 {messages.map((msg, index) => (
@@ -298,14 +305,13 @@ const TopicExplorer = () => {
           <div className="w-1/4">
             <h3 className="text-2xl font-semibold mb-4 text-white">Related Topics</h3>
             <ul className="space-y-4">
-              {currentTopic.subtopics.map((subtopic, index) => (
+              {topics.map((topic, index) => (
                 <li key={index}>
                   <button
-                    onClick={() => handleSubtopicClick(subtopic)}
+                    onClick={() => handleTopicChange(topic)}
                     className="flex flex-col w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-4 rounded shadow"
                   >
-                    <span className="font-semibold mb-2">{subtopic.title}</span>
-                    <span className="text-sm">{subtopic.description}</span>
+                    <span className="font-semibold mb-2">{topic.title}</span>
                     <ChevronRight size={20} className="self-end mt-2" />
                   </button>
                 </li>

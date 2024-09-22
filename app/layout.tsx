@@ -1,5 +1,8 @@
 import '../styles/globals.css'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+
+const ClientLayout = dynamic(() => import('./ClientLayout'), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'Spirit.YourCAIO.co.uk',
@@ -14,9 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-gray-100 text-gray-900">
-        <main className="container mx-auto px-4 py-8">
-          {children}
-        </main>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )
