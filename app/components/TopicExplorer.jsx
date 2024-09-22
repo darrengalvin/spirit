@@ -199,8 +199,8 @@ const TopicExplorer = () => {
     } else {
       return (
         <>
-          <h2 className="text-3xl font-semibold mb-6 text-white">{currentTopic.title}</h2>
-          <p className="text-white text-lg leading-relaxed mb-8">{currentTopic.content}</p>
+          <h2 className="text-3xl font-semibold mb-6 text-[#1c2636]">{currentTopic.title}</h2>
+          <p className="text-[#1c2636] text-lg leading-relaxed mb-8">{currentTopic.content}</p>
         </>
       );
     }
@@ -224,8 +224,8 @@ const TopicExplorer = () => {
         <div className="flex-grow flex p-8">
           {/* Main Content */}
           <div className="w-3/4 pr-8">
-            <div className="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg">
-              {renderContent()}
+          <div className="bg-white bg-opacity-50 p-8 rounded-lg shadow-lg backdrop-blur-sm">
+{renderContent()}
 
               {/* Additional Resources Section */}
               <div className="mt-8 border-t pt-6">
@@ -301,23 +301,43 @@ const TopicExplorer = () => {
             </div>
           </div>
           
-          {/* Related Topics */}
-          <div className="w-1/4">
-            <h3 className="text-2xl font-semibold mb-4 text-white">Related Topics</h3>
-            <ul className="space-y-4">
-              {topics.map((topic, index) => (
-                <li key={index}>
-                  <button
-                    onClick={() => handleTopicChange(topic)}
-                    className="flex flex-col w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-4 rounded shadow"
-                  >
-                    <span className="font-semibold mb-2">{topic.title}</span>
-                    <ChevronRight size={20} className="self-end mt-2" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Deep Dive and Next Topic */}
+<div className="w-1/4">
+  <h3 className="text-2xl font-semibold mb-4 text-white">Explore Further</h3>
+  <div className="space-y-6">
+    {/* Deep Dive Options */}
+    <div>
+      <h4 className="text-xl font-semibold mb-3 text-white">Deep Dive</h4>
+      <ul className="space-y-3">
+        {currentTopic.subtopics.map((subtopic, index) => (
+          <li key={index}>
+            <button
+              onClick={() => handleSubtopicClick(subtopic)}
+              className="w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-3 rounded shadow"
+            >
+              <span className="font-medium">
+                {subtopic.title === "Types of offshore wind foundations"
+                  ? "Explore the foundations of offshore winds"
+                  : `Deep dive into ${subtopic.title.toLowerCase()}`}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+    
+    {/* Next Topic */}
+    <div>
+      <h4 className="text-xl font-semibold mb-3 text-white">Next Topic</h4>
+      <button
+        onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
+        className="w-full text-left bg-white bg-opacity-80 hover:bg-opacity-100 transition-colors duration-300 p-3 rounded shadow"
+      >
+        <span className="font-medium">Explore Substations</span>
+      </button>
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </div>
