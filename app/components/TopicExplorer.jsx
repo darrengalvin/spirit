@@ -638,7 +638,7 @@ const TopicExplorer = () => {
           {/* Additional Resources */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-4 md:mb-6">
             <h3 className="text-lg lg:text-xl font-semibold mb-2 lg:mb-3 text-[#1c2636]">Additional Resources</h3>
-            {Object.entries(currentTopic.resources).map(([type, items]) => (
+            {currentTopic.resources && Object.entries(currentTopic.resources).map(([type, items]) => (
               <div key={type} className="mb-4">
                 <h4 className="text-base lg:text-lg font-semibold mb-2 flex items-center text-[#1c2636]">
                   {type === 'videos' && <Video className="mr-2" size={18} />}
@@ -656,47 +656,45 @@ const TopicExplorer = () => {
           </div>
         </div>
 
-        // In the TopicExplorer component, replace the existing Right Image Area with this:
+        {/* Right Image Area - Hide on mobile */}
+        <div className="hidden md:block w-1/3 relative">
+          {/* Enhanced Next Topic Card - Moved to the top */}
+          <div className="absolute top-0 left-0 right-0 bg-green-100 p-4 z-10">
+            <h3 className="text-lg font-semibold mb-2 text-green-800">Topics</h3>
+            <ul className="list-disc list-inside mb-4 text-sm text-green-700">
+              {topicsList.map((topic, index) => (
+                <li key={index} className="mb-1">
+                  <button
+                    onClick={() => handleTopicChange(topics.find(t => t.title === topic))}
+                    className="text-left hover:underline focus:outline-none"
+                  >
+                    {topic}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
+              className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300 flex items-center justify-center text-sm"
+            >
+              <span className="mr-2">Explore Next Topic</span>
+              <ArrowRight size={20} />
+            </button>
+          </div>
 
-{/* Right Image Area - Hide on mobile */}
-<div className="hidden md:block w-1/3 relative">
-  {/* Enhanced Next Topic Card - Moved to the top */}
-  <div className="absolute top-0 left-0 right-0 bg-green-100 p-4 z-10">
-    <h3 className="text-lg font-semibold mb-2 text-green-800">8 Widgets</h3>
-    <ul className="list-disc list-inside mb-4 text-sm text-green-700">
-      {topicsList.map((topic, index) => (
-        <li key={index} className="mb-1">
-          <button
-            onClick={() => handleTopicChange(topics.find(t => t.title === topic))}
-            className="text-left hover:underline focus:outline-none"
-          >
-            {topic}
-          </button>
-        </li>
-      ))}
-    </ul>
-    <button
-      onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
-      className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300 flex items-center justify-center text-sm"
-    >
-      <span className="mr-2">Explore Next Topic</span>
-      <ArrowRight size={20} />
-    </button>
-  </div>
-
-  <div className="h-full relative">
-    <div 
-      className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
-      style={{ 
-        backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        imageRendering: 'crisp-edges'
-      }}
-    />
-    <div className="absolute inset-0 bg-black bg-opacity-30" />
-  </div>
-</div>
+          <div className="h-full relative">
+            <div 
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+              style={{ 
+                backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                imageRendering: 'crisp-edges'
+              }}
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-30" />
+          </div>
+        </div>
       </div>
     </div>
   );
