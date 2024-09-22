@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Video, BookOpen, FileDown, ArrowRight } from 'lucide-react';
+import { ChevronRight, Video, BookOpen, FileDown, ArrowRight, ChevronUp, ChevronDown, Send, MessageCircle } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -84,7 +84,7 @@ const topics = [
         
         4. Structural Integrity Assessments: Examining welded joints, bolted connections, and overall structural alignment.
         
-        5. J-tube and Cable Entry Inspections: Checking the condition of cable entry points and protective J-tubes.
+        5. J-tube and Cable Entry Inspections: Checking the condition of power cable entries and protective J-tubes.
         
         6. Transition Piece Examinations: Inspecting the connection between the foundation and the turbine tower.
         
@@ -139,6 +139,98 @@ const backgroundImages = [
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_Wind_Turbine_Generator_ztpavk.png"
 ];
 
+const ChatBox = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (input.trim()) {
+      setMessages(prev => [...prev, { text: input, sender: 'user' }]);
+      setInput('');
+      setIsLoading(true);
+
+      try {
+        const response = await axios.post('/api/gpt4o', {
+          prompt: `You are an expert on offshore wind farms. Please provide a concise and informative answer to the following question: ${input}`
+        });
+
+        setMessages(prev => [...prev, { text: response.data.message, sender: 'ai' }]);
+      } catch (error) {
+        console.error('Failed to get AI response:', error);
+        setMessages(prev => [...prev, { text: "I'm sorry, I couldn't process your request at the moment. Please try again later.", sender: 'ai' }]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  return (
+    <motion.div
+      className="fixed top-16 right-6 bg-white rounded-lg shadow-2xl overflow-hidden z-30"
+      initial={{ width: '320px', height: '60px' }}
+      animate={{ 
+        width: isExpanded ? '400px' : '320px', 
+        height: isExpanded ? '500px' : '60px' 
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 flex justify-between items-center text-white cursor-pointer"
+           onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="flex items-center">
+          <MessageCircle size={24} className="mr-2" />
+          <h3 className="font-semibold">Offshore Wind Expert</h3>
+        </div>
+        <button>
+          {isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+        </button>
+      </div>
+      {isExpanded && (
+        <div className="flex flex-col h-full bg-gray-100">
+          <div className="flex-grow overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, index) => (
+              <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-3/4 p-3 rounded-lg ${
+                  msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white text-gray-800 p-3 rounded-lg">
+                  <span className="animate-pulse">Thinking...</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="p-4 bg-gray-200 border-t">
+            <div className="flex items-center bg-white rounded-full shadow-inner">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about offshore wind..."
+                className="flex-grow p-3 bg-transparent focus:outline-none text-gray-800"
+                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              />
+              <button 
+                onClick={handleSend}
+                className="p-3 text-blue-600 hover:text-blue-800 transition-colors duration-300"
+                disabled={isLoading}
+              >
+                <Send size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 const TopicExplorer = () => {
   const [currentTopic, setCurrentTopic] = useState(topics[0]);
   const [currentSubtopic, setCurrentSubtopic] = useState(null);
@@ -147,12 +239,15 @@ const TopicExplorer = () => {
   const [explorationPairs, setExplorationPairs] = useState([]);
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [isGeneratingPairs, setIsGeneratingPairs] = useState(false);
 
   useEffect(() => {
     generateExplorationPairs(currentTopic.title);
   }, [currentTopic]);
 
   const generateExplorationPairs = async (topic) => {
+    setIsGeneratingPairs(true);
     console.log('Generating exploration pairs for topic:', topic);
     const prompt = `Analyze the following topic and generate a series of exploration pairs as described: ${topic}
 
@@ -161,7 +256,7 @@ const TopicExplorer = () => {
     "Analyze the given topic and generate a series of exploration pairs. Each pair should consist of:
     a) An invitation to explore deeper, using phrases like 'Understand', 'Explore', 'Discover', 'Learn about', or 'Dive into'. This should be followed by a key aspect of the topic related to offshore wind farms.
     b) A specific question that directly relates to the exploration invitation, focusing exclusively on offshore wind farms.
-    Ensure that the pairs cover various aspects including components, processes, maintenance, logistics, and roles involved in offshore wind farms. The questions should be specific enough to guide a detailed response while remaining open-ended enough to encourage comprehensive exploration."`;
+    Ensure that the pairs cover various aspects including components, processes, maintenance, logistics, and roles involved. The questions should be specific enough to guide a detailed response while remaining open-ended enough to encourage comprehensive exploration."`;
 
     try {
       console.log('Sending API request for exploration pairs');
@@ -171,6 +266,8 @@ const TopicExplorer = () => {
       setExplorationPairs(pairs);
     } catch (error) {
       console.error('Failed to generate exploration pairs:', error);
+    } finally {
+      setIsGeneratingPairs(false);
     }
   };
 
@@ -199,19 +296,25 @@ const TopicExplorer = () => {
   const generateContent = async (pair) => {
     console.log('Generating content for pair:', pair);
     setIsLoading(true);
+    setLoadingStage(0);
+
     const prompt = `${pair.invitation} Context: ${pair.question}
 
     Important industry information: This content must be specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All content must be strictly focused on offshore wind energy.
 
-    Please provide a detailed response formatted in HTML. Use only <h1>, <h2>, <p>, <ul>, and <li> tags for structure. Do not include any inline styles or classes. Keep the content concise and informative, focusing exclusively on offshore wind farms.`;
+    Please provide a detailed response formatted in HTML. Use only <h2>, <p>, <ul>, and <li> tags for structure. Do not include any inline styles or classes. Keep the content concise and informative, focusing exclusively on offshore wind farms. Do not include any labels like 'a)' or 'b)' in the content.`;
+
     try {
+      setLoadingStage(1); // Move to "Gathering information" stage
       console.log('Sending API request for content generation');
       const response = await axios.post('/api/gpt4o', { prompt });
       console.log('API response for content generation:', response.data);
+      setLoadingStage(2); // Move to "Compiling insights" stage
       setContent(response.data.message);
     } catch (error) {
       console.error('Failed to generate content:', error);
     } finally {
+      setLoadingStage(3); // Move to "Finalizing content" stage
       setIsLoading(false);
     }
   };
@@ -242,7 +345,6 @@ const TopicExplorer = () => {
             transition={{ duration: 0.5 }}
           >
             <h2 className="text-xl font-semibold mb-4 text-[#1c2636]">{currentSubtopic.invitation}</h2>
-            <p className="text-[#1c2636] text-base leading-relaxed mb-4">{currentSubtopic.question}</p>
             {isLoading ? (
               <LoadingEffect />
             ) : (
@@ -268,45 +370,89 @@ const TopicExplorer = () => {
   };
 
   const LoadingEffect = () => {
-    const [stage, setStage] = useState(0);
-    const stages = [
-      "Analyzing topic...",
-      "Gathering information...",
-      "Compiling insights...",
-      "Finalizing content..."
+    const loadingMessages = [
+      "Analyzing offshore wind data...",
+      "Compiling expert insights...",
+      "Exploring cutting-edge technologies...",
+      "Investigating environmental impacts...",
+      "Examining industry best practices...",
+      "Synthesizing global research...",
+      "Evaluating economic factors...",
+      "Assessing maintenance strategies...",
+      "This comprehensive analysis is worth the wait...",
+      "Uncovering innovative solutions...",
+      "Delving into complex engineering challenges...",
     ];
-  
+
+    const [messageIndex, setMessageIndex] = useState(0);
+
     useEffect(() => {
       const interval = setInterval(() => {
-        setStage((prevStage) => (prevStage + 1) % stages.length);
-      }, 3000); // Change stage every 3 seconds
-  
+        setMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
+      }, 3000);
+
       return () => clearInterval(interval);
     }, []);
-  
+
     return (
       <div className="flex flex-col items-center justify-center h-64">
         <div className="relative w-24 h-24 mb-4">
           <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 rounded-full animate-pulse"></div>
           <div className="absolute top-0 left-0 w-full h-full border-t-4 border-blue-500 rounded-full animate-spin"></div>
         </div>
-        <div className="text-blue-500 font-bold mb-2">{stages[stage]}</div>
-        <div className="w-64 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-          <div 
-            className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
-            style={{ width: `${((stage + 1) / stages.length) * 100}%` }}
-          ></div>
+        <div className="text-blue-500 font-bold mb-2 text-center">{loadingMessages[messageIndex]}</div>
+        <motion.div
+          className="w-64 h-2 bg-blue-200 rounded-full overflow-hidden"
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+        >
+          <motion.div 
+            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 3, repeat: Infinity }}
+          ></motion.div>
+        </motion.div>
+      </div>
+    );
+  };
+
+  const DeepDiveLoader = () => {
+    return (
+      <div className="mt-4 lg:mt-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+          <span className="text-blue-500 font-semibold">Generating insights...</span>
+        </div>
+        <div className="relative pt-1">
+          <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+            <motion.div 
+              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 3, repeat: Infinity }}
+            ></motion.div>
+          </div>
+        </div>
+        <div className="flex justify-between text-xs text-blue-700">
+          <span>Analyzing topic</span>
+          <span>Compiling data</span>
+          <span>Finalizing</span>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
+    <div className="relative min-h-screen overflow-hidden bg-gray-100">
       {/* Fixed Header */}
       <header className="bg-[#1c2636] text-white p-2 shadow-md z-10">
         <h1 className="text-xl lg:text-2xl font-bold">Offshore Wind Farm Explorer</h1>
       </header>
+
+      {/* ChatBox */}
+      <ChatBox />
 
       {/* Content Area */}
       <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
@@ -321,39 +467,49 @@ const TopicExplorer = () => {
           >
             {renderContent()}
             
-            <motion.div
-              className="mt-8 bg-blue-50 p-4 rounded-lg shadow"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <h3 className="text-lg font-semibold mb-2 text-blue-800">Looking for more insights?</h3>
-              <p className="text-blue-600 mb-4">Explore these follow-up topics to deepen your understanding of offshore wind farms.</p>
-            </motion.div>
+            {explorationPairs.length > 0 && (
+              <motion.div
+                className="mt-8 bg-blue-50 p-4 rounded-lg shadow"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <h3 className="text-lg font-semibold mb-2 text-blue-800">Looking for more insights?</h3>
+                <p className="text-blue-600 mb-4">Explore these follow-up topics to deepen your understanding of offshore wind farms.</p>
+              </motion.div>
+            )}
 
             <div className="mt-4 lg:mt-6">
-  <h3 className="text-lg font-semibold mb-2 lg:mb-3 text-[#1c2636]">Deep Dive</h3>
-  <ul className="space-y-2">
-    {explorationPairs.map((pair, index) => (
-      <motion.li
-        key={index}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.1 }}
-      >
-        <button
-          onClick={() => handleSubtopicClick(pair)}
-          className="w-full text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-300 p-2 rounded shadow text-sm"
-        >
-          <span className="font-medium text-blue-800">
-            {pair.invitation}
-          </span>
-        </button>
-      </motion.li>
-    ))}
-  </ul>
-</div>
-             
+              {isGeneratingPairs ? (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 lg:mb-3 text-[#1c2636]">Preparing Deep Dive Topics</h3>
+                  <DeepDiveLoader />
+                </div>
+              ) : explorationPairs.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-semibold mb-2 lg:mb-3 text-[#1c2636]">Deep Dive</h3>
+                  <ul className="space-y-2">
+                    {explorationPairs.map((pair, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                      >
+                        <button
+                          onClick={() => handleSubtopicClick(pair)}
+                          className="w-full text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-300 p-2 rounded shadow text-sm"
+                        >
+                          <span className="font-medium text-blue-800">
+                            {pair.invitation}
+                          </span>
+                        </button>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </div>
           </motion.div>
 
           {/* Additional Resources */}
