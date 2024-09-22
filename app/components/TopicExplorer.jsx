@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, Video, BookOpen, FileDown, ArrowRight, ChevronUp, ChevronDown, Send, Menu, MessageCircle } from 'lucide-react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import SpiritSideMenu from './spiritSideMenu';
 
 const topics = [
   {
@@ -139,6 +139,17 @@ const backgroundImages = [
   "https://res.cloudinary.com/dplpckpbm/image/upload/v1726968779/windfarms/Offshore_Wind_Turbine_Generator_ztpavk.png"
 ];
 
+const topicsList = [
+  "Foundations",
+  "Substation",
+  "Wind Turbine Generator (WTG)",
+  "Export & Array Cables",
+  "Vessels",
+  "Workforce",
+  "Offshore Wind Maintenance",
+  "Offshore Wind Port"
+];
+
 const ChatBox = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState([
@@ -146,13 +157,6 @@ const ChatBox = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
 
   const handleSend = async () => {
     if (input.trim()) {
@@ -191,70 +195,76 @@ const ChatBox = () => {
   };
 
   return (
-    <motion.div
-      className="fixed top-16 right-6 bg-white rounded-lg shadow-2xl overflow-hidden z-30"
-      initial={{ width: '320px', height: '60px' }}
-      animate={{ 
-        width: isExpanded ? '400px' : '320px', 
-        height: isExpanded ? '500px' : '60px' 
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <div 
-        className="bg-blue-600 p-4 flex justify-between items-center text-white cursor-pointer"
+    <div className="relative">
+      <button
         onClick={() => setIsExpanded(!isExpanded)}
+        className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
       >
-        <div className="flex items-center">
-          <MessageCircle size={24} className="mr-2" />
-          <h3 className="font-semibold">Offshore Wind Expert</h3>
-        </div>
-        <button>
-          {isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-        </button>
-      </div>
+        <MessageCircle size={24} />
+      </button>
       {isExpanded && (
-        <div className="flex flex-col h-[440px]">
-          <div className="flex-grow overflow-y-auto p-4 space-y-4">
-            {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] p-3 rounded-lg ${
-                  msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
-                }`}>
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-200 text-gray-800 p-3 rounded-lg">
-                  <span className="animate-pulse">Thinking...</span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="p-4 bg-gray-100 border-t">
-            <div className="flex items-center bg-white rounded-full shadow-inner">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about offshore wind..."
-                className="flex-grow p-3 bg-transparent focus:outline-none rounded-l-full"
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              />
-              <button 
-                onClick={handleSend}
-                className="p-3 text-blue-600 hover:text-blue-800 transition-colors duration-300 rounded-r-full"
-                disabled={isLoading}
-              >
-                <Send size={20} />
-              </button>
+        <motion.div
+          className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-2xl overflow-hidden z-30"
+          initial={{ width: '320px', height: '400px', opacity: 0 }}
+          animate={{ width: '400px', height: '500px', opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div 
+            className="bg-blue-600 p-4 flex justify-between items-center text-white cursor-pointer"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <div className="flex items-center">
+              <MessageCircle size={24} className="mr-2" />
+              <h3 className="font-semibold">Offshore Wind Expert</h3>
             </div>
+            <button>
+              {isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+            </button>
           </div>
-        </div>
+          {isExpanded && (
+            <div className="flex flex-col h-[440px]">
+              <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                {messages.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] p-3 rounded-lg ${
+                      msg.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-200 text-gray-800 p-3 rounded-lg">
+                      <span className="animate-pulse">Thinking...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="p-4 bg-gray-100 border-t">
+                <div className="flex items-center bg-white rounded-full shadow-inner">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask about offshore wind..."
+                    className="flex-grow p-3 bg-transparent focus:outline-none rounded-l-full"
+                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                  />
+                  <button 
+                    onClick={handleSend}
+                    className="p-3 text-blue-600 hover:text-blue-800 transition-colors duration-300 rounded-r-full"
+                    disabled={isLoading}
+                  >
+                    <Send size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
@@ -269,6 +279,7 @@ const TopicExplorer = () => {
   const [loadingStage, setLoadingStage] = useState(0);
   const [isGeneratingPairs, setIsGeneratingPairs] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSideMenuExpanded, setIsSideMenuExpanded] = useState(false);
 
   useEffect(() => {
     generateExplorationPairs(currentTopic.title);
@@ -339,18 +350,34 @@ const TopicExplorer = () => {
     console.log('Generating content for pair:', pair);
     setIsLoading(true);
     setLoadingStage(0);
-    setContent(''); // Clear existing content
+    setContent('');
+
+    const topicQuestions = {
+      "Foundations": [
+        "What are the types of offshore wind foundations?",
+        "What are the regular inspections and preventative maintenance?",
+        "What is preventative maintenance for offshore foundations?",
+        "What are the logistics for transporting offshore wind foundations?",
+        "What are above-the-water inspections for offshore wind foundations?",
+        "What are the subsea inspections for offshore wind foundations?"
+      ],
+      // ... add the questions for other topics here
+    };
+
+    const currentTopicQuestions = topicQuestions[currentTopic.title] || [];
 
     const prompt = `${pair.invitation} Context: ${pair.question}
 
     Important industry information: This content must be specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All content must be strictly focused on offshore wind energy.
 
+    Please consider the following questions when generating your response:
+    ${currentTopicQuestions.join('\n')}
+
     Please provide a detailed response formatted in HTML. Use only <h2>, <p>, <ul>, and <li> tags for structure. Do not include any inline styles or classes. Keep the content concise and informative, focusing exclusively on offshore wind farms. Do not include any labels like 'a)' or 'b)' in the content.`;
 
     try {
-      setLoadingStage(1); // Move to "Gathering information" stage
+      setLoadingStage(1);
       console.log('Sending API request for content generation');
-      
       const response = await fetch('/api/gpt4o', {
         method: 'POST',
         headers: {
@@ -364,12 +391,12 @@ const TopicExplorer = () => {
       }
 
       const data = await response.json();
-      setLoadingStage(2); // Move to "Compiling insights" stage
-      setContent(data.message.replace(/\*\*/g, '')); // Remove asterisks from content
+      setLoadingStage(2);
+      setContent(data.message.replace(/\*\*/g, ''));
     } catch (error) {
       console.error('Failed to generate content:', error);
     } finally {
-      setLoadingStage(3); // Move to "Finalizing content" stage
+      setLoadingStage(3);
       setIsLoading(false);
     }
   };
@@ -503,20 +530,23 @@ const TopicExplorer = () => {
     <div className="relative min-h-screen overflow-hidden bg-gray-100">
       {/* Fixed Header */}
       <header className="bg-[#1c2636] text-white p-2 shadow-md z-20 flex justify-between items-center">
-        <h1 className="text-xl lg:text-2xl font-bold">Offshore Wind Farm Explorer</h1>
-        <button 
-          className="md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          <Menu size={24} />
-        </button>
+        <div className="flex items-center">
+          <button 
+            className="md:hidden mr-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-xl lg:text-2xl font-bold md:ml-20">Offshore Wind Farm Explorer</h1>
+        </div>
+        <ChatBox />
       </header>
 
-      {/* ChatBox */}
-      <ChatBox />
+      {/* SideMenu */}
+      <SpiritSideMenu onExpand={setIsSideMenuExpanded} />
 
       {/* Content Area */}
-      <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
+      <div className={`flex flex-col md:flex-row flex-grow overflow-hidden transition-all duration-300 ${isSideMenuExpanded ? 'md:ml-64' : 'md:ml-20'}`}>
         {/* Mobile Menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -626,34 +656,47 @@ const TopicExplorer = () => {
           </div>
         </div>
 
-        {/* Right Image Area - Hide on mobile */}
-        <div className="hidden md:block w-1/3 relative">
-          <div className="h-full relative">
-            <div 
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
-              style={{ 
-                backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                imageRendering: 'crisp-edges'
-              }}
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-30" />
-          </div>
-          
-          {/* Enhanced Next Topic Card */}
-          <div className="absolute bottom-0 left-0 right-0 bg-green-100 p-4">
-            <h3 className="text-lg font-semibold mb-2 text-green-800">Ready to Explore More?</h3>
-            <p className="text-green-700 mb-4 text-sm">Dive into the next exciting topic in offshore wind farming.</p>
-            <button
-              onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
-              className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300 flex items-center justify-center text-sm"
-            >
-              <span className="mr-2">Explore Next Topic</span>
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        </div>
+        // In the TopicExplorer component, replace the existing Right Image Area with this:
+
+{/* Right Image Area - Hide on mobile */}
+<div className="hidden md:block w-1/3 relative">
+  {/* Enhanced Next Topic Card - Moved to the top */}
+  <div className="absolute top-0 left-0 right-0 bg-green-100 p-4 z-10">
+    <h3 className="text-lg font-semibold mb-2 text-green-800">8 Widgets</h3>
+    <ul className="list-disc list-inside mb-4 text-sm text-green-700">
+      {topicsList.map((topic, index) => (
+        <li key={index} className="mb-1">
+          <button
+            onClick={() => handleTopicChange(topics.find(t => t.title === topic))}
+            className="text-left hover:underline focus:outline-none"
+          >
+            {topic}
+          </button>
+        </li>
+      ))}
+    </ul>
+    <button
+      onClick={() => handleTopicChange(topics[(topics.findIndex(t => t.title === currentTopic.title) + 1) % topics.length])}
+      className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-300 flex items-center justify-center text-sm"
+    >
+      <span className="mr-2">Explore Next Topic</span>
+      <ArrowRight size={20} />
+    </button>
+  </div>
+
+  <div className="h-full relative">
+    <div 
+      className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+      style={{ 
+        backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        imageRendering: 'crisp-edges'
+      }}
+    />
+    <div className="absolute inset-0 bg-black bg-opacity-30" />
+  </div>
+</div>
       </div>
     </div>
   );
