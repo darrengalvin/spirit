@@ -124,7 +124,7 @@ const ChatBox = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about offshore wind..."
-                    className="flex-grow p-3 bg-transparent focus:outline-none rounded-l-full"
+                    className="flex-grow p-3 bg-transparent focus:outline-none rounded-l-full text-gray-800"
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   />
                   <button 
@@ -248,16 +248,28 @@ const TopicExplorer = () => {
   const parsePairs = (text) => {
     console.log('Parsing pairs from text:', text);
     const pairs = [];
-    const lines = text.split('\n');
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    
     for (let i = 0; i < lines.length; i += 2) {
       if (lines[i] && lines[i + 1]) {
-        const invitation = lines[i].replace(/^\d+\.\s*[a-z]\)\s*/, '').replace(/^[a-z]\)\s*/, '').trim();
-        const question = lines[i + 1].replace(/^\d+\.\s*[a-z]\)\s*/, '').replace(/^[a-z]\)\s*/, '').trim();
-        if (invitation && question) {
-          pairs.push({ invitation, question });
+        const invitationMatch = lines[i].match(/^a\)\s*(.+)/);
+        const questionMatch = lines[i + 1].match(/^b\)\s*(.+)/);
+        
+        if (invitationMatch && questionMatch) {
+          const invitation = invitationMatch[1].trim();
+          const question = questionMatch[1].trim();
+          
+          if (invitation && question) {
+            pairs.push({ invitation, question });
+          } else {
+            console.warn('Invalid pair detected:', lines[i], lines[i + 1]);
+          }
+        } else {
+          console.warn('Unexpected format:', lines[i], lines[i + 1]);
         }
       }
     }
+    
     console.log('Parsed pairs:', pairs);
     return pairs;
   };
@@ -498,7 +510,19 @@ const TopicExplorer = () => {
               <div className="w-3/4 h-full bg-white p-4" onClick={(e) => e.stopPropagation()}>
                 <h2 className="text-xl font-bold mb-4">Topics</h2>
                 <ul className="space-y-2">
-                  {/* ... (rest of the code remains unchanged) */}
+                  {topicsList.map((topic, index) => (
+                    <li key={index}>
+                      <button
+                        onClick={() => {
+                          handleTopicChange(topic);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full text-left p-2 rounded hover:bg-gray-100"
+                      >
+                        {topic}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </motion.div>
@@ -560,7 +584,9 @@ const TopicExplorer = () => {
                     ))}
                   </ul>
                 </>
-              ) : null}
+              ) : (
+                <div className="text-gray-600">No deep dive topics available at the moment.</div>
+              )}
             </div>
           </motion.div>
 
@@ -600,12 +626,10 @@ const TopicExplorer = () => {
 
           <div className="h-full relative">
             <div 
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+              className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
               style={{ 
                 backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                imageRendering: 'crisp-edges'
+                opacity: isTransitioning ? 0 : 1,
               }}
             />
             <div className="absolute inset-0 bg-black bg-opacity-30" />
