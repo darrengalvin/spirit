@@ -1,64 +1,75 @@
+import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-
-// Create an OpenAI API client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
 
 // IMPORTANT: Set the runtime to edge
 export const runtime = 'edge';
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { searchParams } = new URL(req.url);
+    const prompt = searchParams.get('prompt');
+    const apiKey = process.env.OPENAI_API_KEY;
 
-    // Create the stream
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: `You are a highly knowledgeable expert in wind energy and wind farms. 
-          Format your responses using markdown with the following structure:
-          1. Start with a clear, concise introduction
-          2. Use ## for main section headings
-          3. Use bullet points or numbered lists for key points
-          4. Use **bold** for important terms
-          5. Include a brief summary at the end
-          6. Keep paragraphs short and focused
-          7. Use technical terms but explain them clearly
-          8. Format equations or measurements properly
+    if (!apiKey) {
+      return NextResponse.json(
+        { message: 'OpenAI API key is not configured' },
+        { status: 500 }
+      );
+    }
+
+    if (!prompt) {
+      return NextResponse.json(
+        { message: 'Prompt is required' },
+        { status: 400 }
+      );
+    }
+
+    const openai = new OpenAI({ apiKey });
+    const encoder = new TextEncoder();
+    
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const response = await openai.chat.completions.create({
+            model: 'gpt-4',
+            messages: [{ role: 'user', content: prompt }],
+            stream: true,
+          });
+
+          for await (const chunk of response) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({
+                  choices: [{ delta: { content } }]
+                })}\n\n`)
+              );
+            }
+          }
           
-          Focus on technical accuracy while maintaining accessibility.
-          Always structure your response in a clear, visually appealing way.`
-        },
-        ...messages
-      ],
-    });
-
-    // Create a TransformStream to convert the response to raw text
-    const stream = new TransformStream({
-      async transform(chunk, controller) {
-        const text = chunk.choices[0]?.delta?.content || '';
-        if (text) {
-          controller.enqueue(new TextEncoder().encode(text));
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ error: errorMessage })}\n\n`)
+          );
+          controller.close();
         }
-      }
+      },
     });
 
-    // Pipe the response through our transform stream
-    response.pipe(stream);
-
-    return new Response(stream.readable, {
+    return new Response(stream, {
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     });
   } catch (error) {
-    console.error('Error in AI route:', error);
-    return new Response(
-      JSON.stringify({ error: 'Error processing your request' }), 
+    console.error('API route error:', error);
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

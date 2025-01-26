@@ -5,6 +5,7 @@ import { ChevronRight, Video, BookOpen, FileDown, Search, Menu, X, MessageSquare
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { flushSync } from 'react-dom';
 
 // Quick access topics that appear below search
 const quickTopics = [
@@ -143,6 +144,9 @@ const libraryConversations = [
 ];
 
 const TopicExplorer = () => {
+  // Add audio ref
+  const audioRef = React.useRef(new Audio('https://firebasestorage.googleapis.com/v0/b/yourcaio-649fe.firebasestorage.app/o/180050__kangaroovindaloo__esperance-wind-farm-up-close.wav?alt=media&token=1002efca-fc16-4a00-bb50-477b0a632cdf'));
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTopic, setCurrentTopic] = useState(null);
@@ -158,6 +162,10 @@ const TopicExplorer = () => {
   const [isFollowUpCollapsed, setIsFollowUpCollapsed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isGeneratingPairs, setIsGeneratingPairs] = useState(false);
+  const [explorationPairs, setExplorationPairs] = useState([]);
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [content, setContent] = useState('');
 
   useEffect(() => {
     // Check system preference on mount
@@ -167,6 +175,24 @@ const TopicExplorer = () => {
     }
   }, []);
 
+  // Add effect to handle audio after the existing useEffects
+  useEffect(() => {
+    if (isGeneratingPairs) {
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.3; // Set to 30% volume
+      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+    } else {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    // Cleanup
+    return () => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    };
+  }, [isGeneratingPairs]);
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
@@ -174,30 +200,40 @@ const TopicExplorer = () => {
   // Theme classes
   const themeClasses = {
     // Base backgrounds
-    mainBg: isDarkMode ? 'bg-[#1A1C1E]' : 'bg-[#E8E9EC]',
-    headerBg: isDarkMode ? 'bg-[#2A2C2E]' : 'bg-[#EFF0F3]/80 backdrop-blur-sm',
-    sidebarBg: isDarkMode ? 'bg-[#2A2C2E]' : 'bg-[#E2E4E8]',
-    cardBg: isDarkMode ? 'bg-gray-800/50' : 'bg-[#EFF0F3]/90',
-    inputBg: isDarkMode ? 'bg-gray-800' : 'bg-[#E2E4E8]',
+    mainBg: isDarkMode ? 'bg-spirit-darkBg' : 'bg-spirit-lightBg',
+    headerBg: isDarkMode ? 'bg-spirit-darkBg/90 backdrop-blur-sm' : 'bg-spirit-lightMuted/50 backdrop-blur-sm',
+    sidebarBg: isDarkMode ? 'bg-spirit-darkBg' : 'bg-spirit-lightMuted/30',
+    cardBg: isDarkMode ? 'bg-spirit-muted/30' : 'bg-white',
+    inputBg: isDarkMode ? 'bg-spirit-muted/20' : 'bg-spirit-lightMuted/70',
     
     // Borders
-    border: isDarkMode ? 'border-gray-800' : 'border-[#D8DCE3]',
+    border: isDarkMode ? 'border-spirit-border' : 'border-spirit-lightBorder',
     
     // Text colors
-    textPrimary: isDarkMode ? 'text-white' : 'text-[#2C3542]',
-    textSecondary: isDarkMode ? 'text-gray-400' : 'text-[#5A6478]',
-    textTertiary: isDarkMode ? 'text-gray-300' : 'text-[#4A5468]',
+    textPrimary: isDarkMode ? 'text-white' : 'text-spirit-darkText',
+    textSecondary: isDarkMode ? 'text-spirit-accent/90' : 'text-spirit-darkText/80',
+    textTertiary: isDarkMode ? 'text-spirit-accent/60' : 'text-spirit-darkText/60',
     
     // Hover states
-    hoverBg: isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-[#DFE1E7]',
+    hoverBg: isDarkMode ? 'hover:bg-spirit-muted/40' : 'hover:bg-spirit-lightMuted',
     
     // Special elements
-    chipBg: isDarkMode ? 'bg-gray-800' : 'bg-[#E2E4E8]',
-    gradientFrom: isDarkMode ? 'from-[#1A1C1E]' : 'from-[#E8E9EC]',
-    gradientVia: isDarkMode ? 'via-[#1A1C1E]' : 'via-[#E8E9EC]',
+    chipBg: isDarkMode ? 'bg-spirit-muted/20' : 'bg-spirit-lightMuted/80',
+    gradientFrom: isDarkMode ? 'from-spirit-darkBg' : 'from-spirit-lightMuted',
+    gradientVia: isDarkMode ? 'via-spirit-darkBg' : 'via-spirit-lightMuted',
 
     // Shadows for light mode
-    cardShadow: isDarkMode ? '' : 'shadow-sm shadow-[#D8DCE3]',
+    cardShadow: isDarkMode ? '' : 'shadow-sm shadow-spirit-lightBorder',
+
+    // Links and interactive elements
+    link: isDarkMode ? 'text-spirit-accent hover:text-spirit-accent/80' : 'text-spirit-darkText hover:text-spirit-accent',
+    buttonPrimary: isDarkMode ? 'bg-spirit-accent text-spirit-darkBg hover:bg-spirit-accent/90' : 'bg-spirit-darkText text-white hover:bg-spirit-darkText/90',
+    buttonSecondary: isDarkMode ? 'bg-spirit-muted/30 text-white hover:bg-spirit-muted/40' : 'bg-spirit-lightMuted hover:bg-spirit-lightBorder',
+
+    // Accents and highlights
+    accent: isDarkMode ? 'text-spirit-accent' : 'text-spirit-darkText',
+    accentBg: isDarkMode ? 'bg-spirit-accent' : 'bg-spirit-lightBorder',
+    highlight: isDarkMode ? 'bg-spirit-accent/10' : 'bg-spirit-lightMuted',
   };
 
   // Update card styles to include shadows
@@ -219,6 +255,142 @@ const TopicExplorer = () => {
     handleTopicSelect(randomTopic);
   };
 
+  const generateExplorationPairs = async (topic, retries = 3) => {
+    setIsGeneratingPairs(true);
+    console.log('Generating exploration pairs for topic:', topic);
+    const prompt = `Analyze the following topic and generate a series of exploration pairs as described: ${topic}
+
+    Important industry information: This topic is specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All questions and content must be strictly focused on offshore wind energy.
+
+    "Analyze the given topic and generate a series of exploration pairs. Each pair should consist of:
+    a) An invitation to explore deeper, using phrases like 'Understand', 'Explore', 'Discover', 'Learn about', or 'Dive into'. This should be followed by a key aspect of the topic related to offshore wind farms.
+    b) A specific question that directly relates to the exploration invitation, focusing exclusively on offshore wind farms.
+    Ensure that the pairs cover various aspects including components, processes, maintenance, logistics, and roles involved. The questions should be specific enough to guide a detailed response while remaining open-ended enough to encourage comprehensive exploration."`;
+
+    try {
+      console.log('Sending API request for exploration pairs');
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const data = await response.json();
+      console.log('API response for exploration pairs:', data.message);
+      const pairs = parsePairs(data.message);
+      if (pairs.length === 0 && retries > 0) {
+        console.log('No pairs generated, retrying...');
+        return generateExplorationPairs(topic, retries - 1);
+      }
+      setExplorationPairs(pairs);
+    } catch (error) {
+      console.error('Failed to generate exploration pairs:', error);
+      if (retries > 0) {
+        console.log('Retrying...');
+        return generateExplorationPairs(topic, retries - 1);
+      }
+    } finally {
+      setIsGeneratingPairs(false);
+    }
+  };
+
+  const parsePairs = (text) => {
+    console.log('Parsing pairs from text:', text);
+    const pairs = [];
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    
+    for (let i = 0; i < lines.length; i += 2) {
+      if (lines[i] && lines[i + 1]) {
+        const invitationMatch = lines[i].match(/^a\)\s*(.+)/);
+        const questionMatch = lines[i + 1].match(/^b\)\s*(.+)/);
+        
+        if (invitationMatch && questionMatch) {
+          const invitation = invitationMatch[1].trim();
+          const question = questionMatch[1].trim();
+          
+          if (invitation && question) {
+            pairs.push({ invitation, question });
+          } else {
+            console.warn('Invalid pair detected:', lines[i], lines[i + 1]);
+          }
+        } else {
+          console.warn('Unexpected format:', lines[i], lines[i + 1]);
+        }
+      }
+    }
+    
+    console.log('Parsed pairs:', pairs);
+    return pairs;
+  };
+
+  const generateContent = async (pair) => {
+    console.log('Generating content for pair:', pair);
+    setIsLoading(true);
+    setLoadingStage(0);
+    setContent('');
+
+    const topicQuestions = {
+      "Foundations": [
+        "What are the types of offshore wind foundations?",
+        "What are the regular inspections and preventative maintenance?",
+        "What is preventative maintenance for offshore foundations?",
+        "What are the logistics for transporting offshore wind foundations?",
+        "What are above-the-water inspections for offshore wind foundations?",
+        "What are the subsea inspections for offshore wind foundations?"
+      ],
+      // ... add the questions for other topics here
+    };
+
+    const currentTopicQuestions = topicQuestions[currentTopic] || [];
+
+    const prompt = `${pair.invitation} Context: ${pair.question}
+
+    Important industry information: This content must be specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All content must be strictly focused on offshore wind energy.
+
+    Please consider the following questions when generating your response:
+    ${currentTopicQuestions.join('\n')}
+
+    Please provide a detailed response formatted in HTML. Use only <h2>, <p>, <ul>, and <li> tags for structure. Do not include any inline styles or classes. Keep the content concise and informative, focusing exclusively on offshore wind farms. Do not include any labels like 'a)' or 'b)' in the content.`;
+
+    try {
+      setLoadingStage(1);
+      console.log('Sending API request for content generation');
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+
+      const data = await response.json();
+      const formattedContent = data.message
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/\s*<\/p><p>\s*/g, '</p><p>')
+        .replace(/{"message":"/, '')
+        .replace(/"}$/, '');
+
+      setContent(formattedContent);
+    } catch (error) {
+      console.error('Failed to generate content:', error);
+    } finally {
+      setLoadingStage(3);
+      setIsLoading(false);
+    }
+  };
+
+  // Modify handleAIResponse to run exploration pairs in parallel
   const handleAIResponse = async (question, context = '') => {
     const requestId = Math.random().toString(36).substring(7);
     console.log(`[${requestId}] 🎯 Starting AI response for question: "${question}"`);
@@ -226,58 +398,67 @@ const TopicExplorer = () => {
     setIsLoading(true);
     setIsTyping(true);
 
-    // Set initial state
-    setSelectedQuickTopic({
-      id: 'ai-response',
-      title: question,
-      content: ''
-    });
+    // Start generating exploration pairs in parallel
+    const explorationPromise = generateExplorationPairs(question);
 
     try {
-      const response = await fetch('/api/ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: `${context ? `Context: ${context}\n\n` : ''}${question}`
-            }
-          ]
-        }),
+      // Create a new topic with empty content
+      setSelectedQuickTopic({
+        id: 'ai-response',
+        title: question,
+        content: ''
       });
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
+      const params = new URLSearchParams({ 
+        prompt: `${context ? `Context: ${context}\n\n` : ''}${question}`
+      });
+      
+      const eventSource = new EventSource(`/api/ai?${params}`);
+      let accumulatedText = '';
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let text = '';
+      eventSource.onmessage = (event) => {
+        try {
+          if (event.data === '[DONE]') {
+            console.log(`[${requestId}] Stream complete`);
+            eventSource.close();
+            setIsTyping(false);
+            return;
+          }
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+          const data = JSON.parse(event.data);
+          if (data.error) {
+            throw new Error(data.error);
+          }
 
-        const chunk = decoder.decode(value);
-        text += chunk;
+          const content = data.choices?.[0]?.delta?.content || '';
+          if (content) {
+            accumulatedText += content;
+            setSelectedQuickTopic(current => ({
+              ...current,
+              content: accumulatedText
+            }));
+          }
+        } catch (err) {
+          console.error(`[${requestId}] Parse error:`, err);
+          if (err.message !== 'Unexpected end of JSON input') {
+            throw err;
+          }
+        }
+      };
 
-        // Update UI with each chunk
-        setSelectedQuickTopic(prev => ({
-          ...prev,
-          content: text
-        }));
+      eventSource.onerror = (error) => {
+        console.error(`[${requestId}] EventSource error:`, error);
+        eventSource.close();
+        setIsTyping(false);
+        throw new Error('Connection error occurred');
+      };
 
-        // Log progress
-        console.log(`[${requestId}] Received chunk: ${chunk.length} characters`);
-      }
+      await explorationPromise;
 
       // Add to message history
       setMessages(prev => [...prev, 
         { role: 'user', content: question },
-        { role: 'assistant', content: text }
+        { role: 'assistant', content: accumulatedText }
       ]);
 
     } catch (error) {
@@ -366,9 +547,9 @@ const TopicExplorer = () => {
 
       await handleFollowUpQuestion(followUpQuestion);
       setFollowUpQuestion('');
-    };
+  };
 
-    return (
+  return (
       <div className={`fixed bottom-0 left-0 right-0 z-40 ${themeClasses.mainBg} border-t ${themeClasses.border} shadow-lg`}>
         <div className="max-w-3xl mx-auto p-4">
           <form onSubmit={handleSubmit} className="flex items-center space-x-3">
@@ -530,7 +711,7 @@ const TopicExplorer = () => {
               <p className={`text-xs ${themeClasses.textSecondary} mt-0.5`}>AI-powered response</p>
             </div>
           </div>
-          <button
+                      <button
             onClick={() => setSelectedQuickTopic(null)}
             className={`p-2 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200`}
           >
@@ -545,17 +726,17 @@ const TopicExplorer = () => {
             <div className={`${cardStyle} space-y-8`}>
               <div className="max-w-[680px] mx-auto">
                 <div className={`${themeClasses.textPrimary} text-[17px] leading-[1.6] space-y-6`}>
-                  <article className="prose dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-p:my-4 prose-ul:my-4 prose-li:my-1 prose-strong:text-blue-500 dark:prose-strong:text-blue-400">
+                  <article className="prose dark:prose-invert max-w-none">
                     {selectedQuickTopic.content ? (
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                          h2: ({node, ...props}) => <h2 className="text-2xl font-semibold mt-8 mb-4" {...props} />,
+                          h2: ({node, ...props}) => <h2 className={`text-2xl font-semibold mt-8 mb-4 ${themeClasses.textPrimary}`} {...props} />,
                           p: ({node, ...props}) => <p className="my-4" {...props} />,
                           ul: ({node, ...props}) => <ul className="my-4 list-disc pl-6" {...props} />,
                           ol: ({node, ...props}) => <ol className="my-4 list-decimal pl-6" {...props} />,
                           li: ({node, ...props}) => <li className="my-1" {...props} />,
-                          strong: ({node, ...props}) => <strong className="text-blue-500 dark:text-blue-400 font-semibold" {...props} />,
+                          strong: ({node, ...props}) => <strong className={`${themeClasses.accent} font-semibold`} {...props} />,
                         }}
                       >
                         {selectedQuickTopic.content}
@@ -572,6 +753,52 @@ const TopicExplorer = () => {
                   </article>
                 </div>
               </div>
+            </div>
+
+            {/* Mobile Deep Dive Section - Only show when right sidebar is hidden */}
+            <div className="xl:hidden">
+              {explorationPairs.length > 0 && (
+                <motion.div
+                  className={`${cardStyle} mt-8`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Deep Dive</h3>
+                  <div className="space-y-3">
+                    {isGeneratingPairs ? (
+                      <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                          <p className={`text-sm ${themeClasses.textSecondary}`}>
+                            Analyzing {selectedQuickTopic?.title || 'your question'} to find relevant deep dive topics...
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      explorationPairs.map((pair, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestedDiscussion(pair.question)}
+                          className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
+                        >
+                          <div className="flex items-start space-x-2">
+                            <MessageSquare size={16} className="text-blue-500 mt-1 flex-shrink-0" />
+                            <div>
+                              <p className={`text-sm font-medium ${themeClasses.textPrimary} group-hover:text-blue-500 transition-colors duration-200`}>
+                                {pair.invitation}
+                              </p>
+                              <p className={`text-xs ${themeClasses.textSecondary} mt-1`}>
+                                {pair.question}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
@@ -609,10 +836,10 @@ const TopicExplorer = () => {
                     </p>
                   </div>
                 </div>
-              </button>
-            ))}
+                      </button>
+                  ))}
           </div>
-        </div>
+              </div>
 
         {/* Topics Section */}
         <div>
@@ -631,7 +858,7 @@ const TopicExplorer = () => {
                 >
                   <h4 className={`text-lg font-medium ${themeClasses.textPrimary} mb-2 group-hover:text-blue-500 transition-colors duration-200`}>
                     {topic.title}
-                  </h4>
+                    </h4>
                   <p className={`text-sm ${themeClasses.textSecondary} mb-3`}>
                     {topic.preview}
                   </p>
@@ -676,11 +903,11 @@ const TopicExplorer = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="text-blue-500" size={24} />
-                  <h1 className={`text-2xl font-bold ${themeClasses.textPrimary} tracking-tight`}>
-                    Wind Energy Explorer
+                  <Sparkles className={themeClasses.accent} size={24} />
+                  <h1 className={`text-2xl font-bold ${themeClasses.accent} tracking-tight`}>
+                    Spirit Wind Explorer
                   </h1>
-                </div>
+              </div>
 
                 <button
                   onClick={toggleTheme}
@@ -708,9 +935,26 @@ const TopicExplorer = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center justify-center py-20"
+                    className="flex flex-col items-center justify-center py-20 space-y-6"
                   >
-                    <div className="text-blue-400">Loading...</div>
+                    <div className={`${cardStyle} max-w-lg w-full`}>
+                      <div className="flex flex-col space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                          <p className={`${themeClasses.textPrimary}`}>
+                            {selectedQuickTopic ? `Analyzing "${selectedQuickTopic.title}"...` : 'Preparing response...'}
+                          </p>
+                        </div>
+                        {isGeneratingPairs && (
+                          <div className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                            <p className={`${themeClasses.textSecondary}`}>
+                              Generating deep dive topics about {selectedQuickTopic?.title || 'this topic'}...
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </motion.div>
                 ) : selectedQuickTopic ? (
                   <div className="h-[calc(100vh-8rem-76px)]">
@@ -728,21 +972,36 @@ const TopicExplorer = () => {
             <div className="p-6">
               <h3 className={`text-lg font-semibold mb-4 ${themeClasses.textPrimary}`}>Deep Dive</h3>
               <div className="space-y-3">
-                {selectedQuickTopic && contentDatabase[selectedQuickTopic.id]?.relatedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestedDiscussion(question)}
-                    className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
-                  >
-                    <div className="flex items-start space-x-2">
-                      <MessageSquare size={16} className="text-blue-500 mt-1 flex-shrink-0" />
-                      <span className={`text-sm ${themeClasses.textTertiary} group-hover:text-blue-500 transition-colors duration-200`}>
-                        {question}
-                      </span>
+                {isGeneratingPairs ? (
+                  <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      <p className={`text-sm ${themeClasses.textSecondary}`}>
+                        Analyzing {selectedQuickTopic?.title || 'your question'} to find relevant deep dive topics...
+                      </p>
                     </div>
+                  </div>
+                ) : explorationPairs.length > 0 ? (
+                  explorationPairs.map((pair, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestedDiscussion(pair.question)}
+                      className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
+                    >
+                      <div className="flex items-start space-x-2">
+                        <MessageSquare size={16} className="text-blue-500 mt-1 flex-shrink-0" />
+                        <div>
+                          <p className={`text-sm font-medium ${themeClasses.textPrimary} group-hover:text-blue-500 transition-colors duration-200`}>
+                            {pair.invitation}
+                          </p>
+                          <p className={`text-xs ${themeClasses.textSecondary} mt-1`}>
+                            {pair.question}
+                          </p>
+                        </div>
+                      </div>
                   </button>
-                ))}
-                {!selectedQuickTopic && (
+                  ))
+                ) : (
                   <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
                     <p className={`text-sm ${themeClasses.textSecondary} text-center`}>
                       Select a topic or ask a question to explore deeper

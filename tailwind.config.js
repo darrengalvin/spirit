@@ -8,8 +8,22 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      colors: {
+        spirit: {
+          // Dark mode colors
+          darkBg: '#00242E',
+          accent: '#2FF7FA',
+          muted: '#14474E',
+          border: '#004D59',
+          // Light mode colors
+          lightBg: '#FFFFFF',
+          darkText: '#00242E',
+          lightMuted: '#E6F9FA',
+          lightBorder: '#B8ECEE',
+        }
+      },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Poppins', 'sans-serif'],
       },
       backdropFilter: {
         'none': 'none',
@@ -21,13 +35,14 @@ module.exports = {
             maxWidth: 'none',
             color: 'inherit',
             a: {
-              color: '#3B82F6',
+              color: '#2FF7FA',
               '&:hover': {
-                color: '#2563EB',
+                color: '#2FF7FA',
+                opacity: 0.8,
               },
             },
             strong: {
-              color: '#3B82F6',
+              color: '#2FF7FA',
               fontWeight: '600',
             },
             h1: {
@@ -47,8 +62,8 @@ module.exports = {
               fontWeight: '600',
             },
             code: {
-              color: '#3B82F6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              color: '#2FF7FA',
+              backgroundColor: 'rgba(47, 247, 250, 0.1)',
               borderRadius: '0.25rem',
               padding: '0.25rem',
             },
@@ -59,14 +74,14 @@ module.exports = {
               content: '""',
             },
             pre: {
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              backgroundColor: 'rgba(47, 247, 250, 0.1)',
               color: 'inherit',
               borderRadius: '0.5rem',
               padding: '1rem',
             },
             blockquote: {
               color: 'inherit',
-              borderLeftColor: '#3B82F6',
+              borderLeftColor: '#2FF7FA',
             },
           },
         },
