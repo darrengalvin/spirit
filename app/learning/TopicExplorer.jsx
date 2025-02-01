@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, Video, BookOpen, FileDown, Search, Menu, X, MessageSquare, Lightbulb, ArrowRight, Sparkles, BookOpenIcon, ArrowUpRight, Link, ExternalLink, Clock, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -144,8 +144,25 @@ const libraryConversations = [
 ];
 
 const TopicExplorer = () => {
-  // Add audio ref
-  const audioRef = React.useRef(new Audio('https://firebasestorage.googleapis.com/v0/b/yourcaio-649fe.firebasestorage.app/o/180050__kangaroovindaloo__esperance-wind-farm-up-close.wav?alt=media&token=1002efca-fc16-4a00-bb50-477b0a632cdf'));
+  // Audio sources with their display names
+  const audioSources = [
+    {
+      url: 'https://firebasestorage.googleapis.com/v0/b/yourcaio-649fe.firebasestorage.app/o/windfarm-turbine.wav?alt=media&token=a2ea02d1-8af8-4cac-bad8-8e24cf4ec644',
+      name: 'Wind Farm Turbine'
+    },
+    {
+      url: 'https://firebasestorage.googleapis.com/v0/b/yourcaio-649fe.firebasestorage.app/o/windfarm-turbine-walkbye.wav?alt=media&token=187421ec-ae6f-43a1-be14-3cc4105aba2f',
+      name: 'Turbine Walk-by'
+    },
+    {
+      url: 'https://firebasestorage.googleapis.com/v0/b/yourcaio-649fe.firebasestorage.app/o/wind-turbine-blades.wav?alt=media&token=cd2ed807-515f-402d-8b45-1c5a67d3c143',
+      name: 'Turbine Blades'
+    }
+  ];
+
+  // Create refs for all audio sources
+  const audioRefs = useRef(audioSources.map(source => new Audio(source.url)));
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -166,6 +183,12 @@ const TopicExplorer = () => {
   const [explorationPairs, setExplorationPairs] = useState([]);
   const [loadingStage, setLoadingStage] = useState(0);
   const [content, setContent] = useState('');
+  const [fullResponse, setFullResponse] = useState('');
+  const [displayedResponse, setDisplayedResponse] = useState('');
+  const [error, setError] = useState(null);
+  const eventSourceRef = React.useRef(null);
+  const typewriterTimeoutRef = React.useRef(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   useEffect(() => {
     // Check system preference on mount
@@ -175,23 +198,76 @@ const TopicExplorer = () => {
     }
   }, []);
 
-  // Add effect to handle audio after the existing useEffects
+  // Update the audio effect
   useEffect(() => {
-    if (isGeneratingPairs) {
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3; // Set to 30% volume
-      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    const playAudio = async () => {
+      if (isLoading) {
+        try {
+          // Pick a random audio source
+          const randomIndex = Math.floor(Math.random() * audioSources.length);
+          setCurrentAudioIndex(randomIndex);
+          
+          const currentAudio = audioRefs.current[randomIndex];
+          
+          // Ensure audio is loaded
+          if (currentAudio.readyState < 4) {
+            await new Promise((resolve) => {
+              currentAudio.addEventListener('canplaythrough', resolve, { once: true });
+              currentAudio.load();
+            });
+          }
+          
+          currentAudio.loop = true;
+          currentAudio.volume = 0.3;
+          await currentAudio.play();
+          setIsAudioPlaying(true);
+        } catch (e) {
+          console.log('Audio play failed:', e);
+        }
+      } else {
+        // Stop all audio when loading ends
+        audioRefs.current.forEach(audio => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+        setIsAudioPlaying(false);
+      }
+    };
+
+    playAudio();
 
     // Cleanup
     return () => {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      audioRefs.current.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+      setIsAudioPlaying(false);
     };
-  }, [isGeneratingPairs]);
+  }, [isLoading]);
+
+  // Update the typewriter effect to be more responsive
+  useEffect(() => {
+    if (fullResponse.length > displayedResponse.length) {
+      if (typewriterTimeoutRef.current) {
+        clearTimeout(typewriterTimeoutRef.current);
+      }
+      // Display content immediately as it arrives
+      setDisplayedResponse(fullResponse);
+    }
+  }, [fullResponse, displayedResponse]);
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      if (typewriterTimeoutRef.current) {
+        clearTimeout(typewriterTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -255,173 +331,134 @@ const TopicExplorer = () => {
     handleTopicSelect(randomTopic);
   };
 
-  const generateExplorationPairs = async (topic, retries = 3) => {
-    setIsGeneratingPairs(true);
-    console.log('Generating exploration pairs for topic:', topic);
-    const prompt = `Analyze the following topic and generate a series of exploration pairs as described: ${topic}
-
-    Important industry information: This topic is specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All questions and content must be strictly focused on offshore wind energy.
-
-    "Analyze the given topic and generate a series of exploration pairs. Each pair should consist of:
-    a) An invitation to explore deeper, using phrases like 'Understand', 'Explore', 'Discover', 'Learn about', or 'Dive into'. This should be followed by a key aspect of the topic related to offshore wind farms.
-    b) A specific question that directly relates to the exploration invitation, focusing exclusively on offshore wind farms.
-    Ensure that the pairs cover various aspects including components, processes, maintenance, logistics, and roles involved. The questions should be specific enough to guide a detailed response while remaining open-ended enough to encourage comprehensive exploration."`;
-
-    try {
-      console.log('Sending API request for exploration pairs');
-      const response = await fetch('/api/gpt4o', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      const data = await response.json();
-      console.log('API response for exploration pairs:', data.message);
-      const pairs = parsePairs(data.message);
-      if (pairs.length === 0 && retries > 0) {
-        console.log('No pairs generated, retrying...');
-        return generateExplorationPairs(topic, retries - 1);
-      }
-      setExplorationPairs(pairs);
-    } catch (error) {
-      console.error('Failed to generate exploration pairs:', error);
-      if (retries > 0) {
-        console.log('Retrying...');
-        return generateExplorationPairs(topic, retries - 1);
-      }
-    } finally {
-      setIsGeneratingPairs(false);
-    }
-  };
-
   const parsePairs = (text) => {
-    console.log('Parsing pairs from text:', text);
     const pairs = [];
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const lines = text.split('\n');
+    let currentPair = {};
     
-    for (let i = 0; i < lines.length; i += 2) {
-      if (lines[i] && lines[i + 1]) {
-        const invitationMatch = lines[i].match(/^a\)\s*(.+)/);
-        const questionMatch = lines[i + 1].match(/^b\)\s*(.+)/);
-        
-        if (invitationMatch && questionMatch) {
-          const invitation = invitationMatch[1].trim();
-          const question = questionMatch[1].trim();
-          
-          if (invitation && question) {
-            pairs.push({ invitation, question });
-          } else {
-            console.warn('Invalid pair detected:', lines[i], lines[i + 1]);
-          }
-        } else {
-          console.warn('Unexpected format:', lines[i], lines[i + 1]);
+    for (const line of lines) {
+      if (line.toLowerCase().startsWith('invitation:') || line.toLowerCase().startsWith('explore:')) {
+        currentPair.invitation = line.split(':')[1].trim();
+      } else if (line.toLowerCase().startsWith('question:')) {
+        currentPair.question = line.split(':')[1].trim();
+        if (currentPair.invitation && currentPair.question) {
+          pairs.push({...currentPair});
+          currentPair = {};
         }
       }
     }
-    
-    console.log('Parsed pairs:', pairs);
     return pairs;
+  };
+
+  const generateExplorationPairs = async (topic) => {
+    try {
+      const prompt = `Generate 3-5 exploration pairs about ${topic}. Each pair should have an invitation and a question in this format:
+
+Invitation: [An inviting statement that encourages exploration of a specific aspect]
+Question: [A thought-provoking question related to the invitation]
+
+Example:
+Invitation: Discover how offshore wind farms protect marine ecosystems
+Question: What innovative methods do modern wind farms use to create artificial reefs around their foundations?
+
+Make the pairs specifically about offshore wind farms and their technology, environmental impact, or operations.`;
+
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate pairs');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(5);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || '';
+              accumulatedText += content;
+              const pairs = parsePairs(accumulatedText);
+              setExplorationPairs(pairs);
+            } catch (err) {
+              if (err instanceof Error && err.message !== 'Unexpected end of JSON input') {
+                console.error('Error processing pairs chunk:', err);
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error generating pairs:', error);
+    }
   };
 
   const generateContent = async (pair) => {
     console.log('Generating content for pair:', pair);
-    setIsLoading(true);
-    setLoadingStage(0);
-    setContent('');
-
-    const topicQuestions = {
-      "Foundations": [
-        "What are the types of offshore wind foundations?",
-        "What are the regular inspections and preventative maintenance?",
-        "What is preventative maintenance for offshore foundations?",
-        "What are the logistics for transporting offshore wind foundations?",
-        "What are above-the-water inspections for offshore wind foundations?",
-        "What are the subsea inspections for offshore wind foundations?"
-      ],
-      // ... add the questions for other topics here
-    };
-
-    const currentTopicQuestions = topicQuestions[currentTopic] || [];
-
-    const prompt = `${pair.invitation} Context: ${pair.question}
-
-    Important industry information: This content must be specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All content must be strictly focused on offshore wind energy.
-
-    Please consider the following questions when generating your response:
-    ${currentTopicQuestions.join('\n')}
-
-    Please provide a detailed response formatted in HTML. Use only <h2>, <p>, <ul>, and <li> tags for structure. Do not include any inline styles or classes. Keep the content concise and informative, focusing exclusively on offshore wind farms. Do not include any labels like 'a)' or 'b)' in the content.`;
-
-    try {
-      setLoadingStage(1);
-      console.log('Sending API request for content generation');
-      const response = await fetch('/api/gpt4o', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        throw new Error(response.statusText);
+    
+    // Kill any existing stream
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      if (fullResponse) {
+        setDisplayedResponse(fullResponse);
       }
-
-      const data = await response.json();
-      const formattedContent = data.message
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>')
-        .replace(/\s*<\/p><p>\s*/g, '</p><p>')
-        .replace(/{"message":"/, '')
-        .replace(/"}$/, '');
-
-      setContent(formattedContent);
-    } catch (error) {
-      console.error('Failed to generate content:', error);
-    } finally {
-      setLoadingStage(3);
-      setIsLoading(false);
     }
-  };
-
-  // Modify handleAIResponse to run exploration pairs in parallel
-  const handleAIResponse = async (question, context = '') => {
-    const requestId = Math.random().toString(36).substring(7);
-    console.log(`[${requestId}] 🎯 Starting AI response for question: "${question}"`);
 
     setIsLoading(true);
-    setIsTyping(true);
-
-    // Start generating exploration pairs in parallel
-    const explorationPromise = generateExplorationPairs(question);
+    setFullResponse('');
+    setDisplayedResponse('');
+    setError(null);
 
     try {
-      // Create a new topic with empty content
-      setSelectedQuickTopic({
-        id: 'ai-response',
-        title: question,
-        content: ''
-      });
+      const prompt = `${pair.invitation} Context: ${pair.question}
 
-      const params = new URLSearchParams({ 
-        prompt: `${context ? `Context: ${context}\n\n` : ''}${question}`
-      });
-      
+      Important industry information: This content must be specifically about OFFSHORE wind farms. Do not include any information about onshore wind farms or unrelated topics. All content must be strictly focused on offshore wind energy.
+
+      Please provide a detailed response with clear structure using markdown formatting:
+      - Use # for main headings
+      - Use ## for subheadings
+      - Use bullet points or numbered lists where appropriate
+      - Include relevant examples and explanations
+      - Break down complex concepts into digestible sections`;
+
+      console.log('📡 Connecting to EventSource...');
+      const params = new URLSearchParams({ prompt });
       const eventSource = new EventSource(`/api/ai?${params}`);
-      let accumulatedText = '';
+      eventSourceRef.current = eventSource;
+
+      let chunkCount = 0;
+      let totalCharacters = 0;
+      let startTime = Date.now();
+      let accumulatedContent = '';
+
+      eventSource.onopen = () => {
+        console.log('🔗 EventSource connection established');
+      };
 
       eventSource.onmessage = (event) => {
         try {
           if (event.data === '[DONE]') {
-            console.log(`[${requestId}] Stream complete`);
+            const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+            console.log(`✅ Stream complete:
+- Total chunks received: ${chunkCount}
+- Total characters: ${totalCharacters}
+- Duration: ${duration}s
+- Average speed: ${(totalCharacters / duration).toFixed(2)} chars/sec`);
             eventSource.close();
-            setIsTyping(false);
+            setIsLoading(false);
             return;
           }
 
@@ -432,69 +469,140 @@ const TopicExplorer = () => {
 
           const content = data.choices?.[0]?.delta?.content || '';
           if (content) {
-            accumulatedText += content;
-            setSelectedQuickTopic(current => ({
-              ...current,
-              content: accumulatedText
-            }));
+            chunkCount++;
+            totalCharacters += content.length;
+            console.log(`📝 Chunk #${chunkCount} received: ${content.length} chars`);
+            accumulatedContent += content;
+            // Update both states immediately
+            setFullResponse(accumulatedContent);
+            setDisplayedResponse(accumulatedContent);
+            setContent(accumulatedContent);
           }
         } catch (err) {
-          console.error(`[${requestId}] Parse error:`, err);
-          if (err.message !== 'Unexpected end of JSON input') {
-            throw err;
+          if (err instanceof Error && err.message !== 'Unexpected end of JSON input') {
+            console.error('❌ Error processing chunk:', err);
+            setError({ message: err.message });
           }
         }
       };
 
       eventSource.onerror = (error) => {
-        console.error(`[${requestId}] EventSource error:`, error);
+        console.error('❌ EventSource error:', error);
         eventSource.close();
-        setIsTyping(false);
-        throw new Error('Connection error occurred');
+        setIsLoading(false);
+        setError({ message: 'Connection error occurred' });
       };
 
-      await explorationPromise;
-
-      // Add to message history
-      setMessages(prev => [...prev, 
-        { role: 'user', content: question },
-        { role: 'assistant', content: accumulatedText }
-      ]);
-
     } catch (error) {
-      console.error(`[${requestId}] ❌ Error:`, error);
-      setSelectedQuickTopic(prev => ({
-        ...prev,
-        content: `Error: ${error.message}. Please try again.`
-      }));
-    } finally {
+      console.error('Failed to generate content:', error);
+      setError({ message: error.message });
       setIsLoading(false);
-      setIsTyping(false);
     }
   };
 
-  const handleSuggestedDiscussion = async (question, description = '') => {
+  const handleSuggestedDiscussion = async (question) => {
+    console.log('🚀 Starting new discussion:', question);
     setCurrentQuestion(question);
     setSearchHistory(prev => [...prev, { content: question, type: 'question' }]);
     
-    // Create a temporary topic for the UI
-    const tempTopic = {
+    setSelectedQuickTopic({
       id: 'ai-response',
       title: question,
-      subtitle: description || 'AI-generated response',
-      content: 'Loading...'
-    };
+      content: ''
+    });
     
-    setSelectedQuickTopic(tempTopic);
-    
-    // Get AI response
-    await handleAIResponse(question);
+    setIsLoading(true);
+    setIsGeneratingPairs(true); // Start the sound when we begin loading
+    setFullResponse('');
+    setDisplayedResponse('');
+    setError(null);
+
+    try {
+      const enhancedPrompt = `${question}
+
+Please provide a detailed response with clear structure using markdown formatting:
+- Use # for main headings
+- Use ## for subheadings
+- Use bullet points or numbered lists where appropriate
+- Include relevant examples and explanations
+- Break down complex concepts into digestible sections
+
+Focus exclusively on offshore wind farms and structure the response with clear sections.`;
+
+      console.log('📡 Connecting to streaming endpoint...');
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: enhancedPrompt })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let chunkCount = 0;
+      let startTime = Date.now();
+      let accumulatedContent = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          console.log(`✅ Stream complete: ${chunkCount} chunks in ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
+          setIsLoading(false);
+          setIsGeneratingPairs(false); // Stop the sound when we're done
+          // Generate exploration pairs after successful response
+          generateExplorationPairs(question);
+          break;
+        }
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(5);
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || '';
+              if (content) {
+                chunkCount++;
+                console.log(`📝 Chunk #${chunkCount} received: ${content.length} chars`);
+                accumulatedContent += content;
+                // Update both states immediately
+                setFullResponse(accumulatedContent);
+                setDisplayedResponse(accumulatedContent);
+                setSelectedQuickTopic(current => ({
+                  ...current,
+                  content: accumulatedContent
+                }));
+              }
+            } catch (err) {
+              if (err instanceof Error && err.message !== 'Unexpected end of JSON input') {
+                console.error('❌ Error processing chunk:', err);
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      console.error('❌ Stream error:', errorMessage);
+      setError({ message: errorMessage });
+      setIsLoading(false);
+      setIsGeneratingPairs(false); // Make sure to stop the sound if there's an error
+    }
   };
 
   const handleFollowUpQuestion = async (question) => {
     // Include previous context in the follow-up
     const context = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    await handleAIResponse(question, context);
+    await handleSuggestedDiscussion(question, context);
   };
 
   // Pro tooltip content
@@ -547,9 +655,9 @@ const TopicExplorer = () => {
 
       await handleFollowUpQuestion(followUpQuestion);
       setFollowUpQuestion('');
-  };
+    };
 
-  return (
+    return (
       <div className={`fixed bottom-0 left-0 right-0 z-40 ${themeClasses.mainBg} border-t ${themeClasses.border} shadow-lg`}>
         <div className="max-w-3xl mx-auto p-4">
           <form onSubmit={handleSubmit} className="flex items-center space-x-3">
@@ -581,7 +689,82 @@ const TopicExplorer = () => {
     );
   };
 
-  // Landing Question Section
+  // Move LeftSidebar component here, before the main return
+  const LeftSidebar = () => (
+    <div className={`hidden lg:block w-80 border-r ${themeClasses.border} ${themeClasses.sidebarBg} overflow-y-auto transition-colors duration-200`}>
+      <div className="p-6">
+        {/* Library Section */}
+        <div className="mb-8">
+          <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Library</h3>
+          <div className="space-y-2">
+            {libraryConversations.map((conversation) => (
+              <button
+                key={conversation.id}
+                onClick={() => handleSuggestedDiscussion(conversation.title)}
+                className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {conversation.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${themeClasses.textPrimary} truncate group-hover:text-blue-500 transition-colors duration-200`}>
+                      {conversation.title}
+                    </p>
+                    <p className={`text-xs ${themeClasses.textSecondary} mt-0.5 truncate`}>
+                      {conversation.preview}
+                    </p>
+                    <p className={`text-xs ${themeClasses.textTertiary} mt-1`}>
+                      {conversation.timestamp}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Topics Section */}
+        <div>
+          <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Topics</h3>
+          <div className="space-y-3">
+            {quickTopics.map((topic) => (
+              <div
+                key={topic.id}
+                className={`rounded-lg overflow-hidden ${
+                  selectedTopic?.id === topic.id ? 'ring-2 ring-blue-500' : ''
+                }`}
+              >
+                <button
+                  onClick={() => handleTopicSelect(topic)}
+                  className={`w-full text-left p-4 ${themeClasses.hoverBg} transition-all duration-200 group`}
+                >
+                  <h4 className={`text-lg font-medium ${themeClasses.textPrimary} mb-2 group-hover:text-blue-500 transition-colors duration-200`}>
+                    {topic.title}
+                  </h4>
+                  <p className={`text-sm ${themeClasses.textSecondary} mb-3`}>
+                    {topic.preview}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {topic.relatedTopics.map((related, index) => (
+                      <span
+                        key={index}
+                        className={`text-xs px-2 py-1 ${themeClasses.chipBg} ${themeClasses.textTertiary} rounded-full`}
+                      >
+                        {related}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Add LandingSection component here
   const LandingSection = () => (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <div className="w-full max-w-3xl">
@@ -695,13 +878,14 @@ const TopicExplorer = () => {
     </div>
   );
 
+  // Add renderContent function here
   const renderContent = () => {
     if (!selectedQuickTopic) return null;
 
     return (
       <div className="flex flex-col h-full">
         {/* Compact Topic Navigation Bar */}
-        <div className={`flex items-center justify-between text-sm mb-6 p-4 ${themeClasses.cardBg} rounded-xl ${themeClasses.cardShadow}`}>
+        <div className={`flex items-center justify-between text-sm p-4 ${themeClasses.cardBg} rounded-xl ${themeClasses.cardShadow}`}>
           <div className="flex items-center space-x-3">
             <div className={`p-2 ${themeClasses.chipBg} rounded-lg`}>
               <BookOpenIcon size={18} className="text-blue-500" />
@@ -711,7 +895,7 @@ const TopicExplorer = () => {
               <p className={`text-xs ${themeClasses.textSecondary} mt-0.5`}>AI-powered response</p>
             </div>
           </div>
-                      <button
+          <button
             onClick={() => setSelectedQuickTopic(null)}
             className={`p-2 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200`}
           >
@@ -719,86 +903,35 @@ const TopicExplorer = () => {
           </button>
         </div>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto mb-4 pr-4 -mr-4">
-          <div className="space-y-8">
-            {/* Main Content Card */}
-            <div className={`${cardStyle} space-y-8`}>
-              <div className="max-w-[680px] mx-auto">
-                <div className={`${themeClasses.textPrimary} text-[17px] leading-[1.6] space-y-6`}>
-                  <article className="prose dark:prose-invert max-w-none">
-                    {selectedQuickTopic.content ? (
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          h2: ({node, ...props}) => <h2 className={`text-2xl font-semibold mt-8 mb-4 ${themeClasses.textPrimary}`} {...props} />,
-                          p: ({node, ...props}) => <p className="my-4" {...props} />,
-                          ul: ({node, ...props}) => <ul className="my-4 list-disc pl-6" {...props} />,
-                          ol: ({node, ...props}) => <ol className="my-4 list-decimal pl-6" {...props} />,
-                          li: ({node, ...props}) => <li className="my-1" {...props} />,
-                          strong: ({node, ...props}) => <strong className={`${themeClasses.accent} font-semibold`} {...props} />,
-                        }}
-                      >
-                        {selectedQuickTopic.content}
-                      </ReactMarkdown>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <span>Generating response</span>
-                        <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse" />
-                      </div>
-                    )}
-                    {isTyping && (
-                      <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-1" />
-                    )}
-                  </article>
-                </div>
-              </div>
+        {/* Loading State - Show progress */}
+        {isLoading && !displayedResponse && (
+          <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-lg animate-pulse">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              <p className={`text-sm ${themeClasses.textSecondary}`}>
+                Generating response...
+              </p>
             </div>
+          </div>
+        )}
 
-            {/* Mobile Deep Dive Section - Only show when right sidebar is hidden */}
-            <div className="xl:hidden">
-              {explorationPairs.length > 0 && (
-                <motion.div
-                  className={`${cardStyle} mt-8`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Deep Dive</h3>
-                  <div className="space-y-3">
-                    {isGeneratingPairs ? (
-                      <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                          <p className={`text-sm ${themeClasses.textSecondary}`}>
-                            Analyzing {selectedQuickTopic?.title || 'your question'} to find relevant deep dive topics...
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      explorationPairs.map((pair, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestedDiscussion(pair.question)}
-                          className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
-                        >
-                          <div className="flex items-start space-x-2">
-                            <MessageSquare size={16} className="text-blue-500 mt-1 flex-shrink-0" />
-                            <div>
-                              <p className={`text-sm font-medium ${themeClasses.textPrimary} group-hover:text-blue-500 transition-colors duration-200`}>
-                                {pair.invitation}
-                              </p>
-                              <p className={`text-xs ${themeClasses.textSecondary} mt-1`}>
-                                {pair.question}
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              )}
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto mt-4">
+          <div className={`${cardStyle} h-full`}>
+            <div className="max-w-[680px] mx-auto">
+              <div className={`${themeClasses.textPrimary} text-[17px] leading-[1.6]`}>
+                <article className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {displayedResponse}
+                  </ReactMarkdown>
+                  {isLoading && displayedResponse && (
+                    <div className="flex items-center gap-2 text-sm text-blue-500">
+                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      <span>Generating more...</span>
+                    </div>
+                  )}
+                </article>
+              </div>
             </div>
           </div>
         </div>
@@ -806,76 +939,37 @@ const TopicExplorer = () => {
     );
   };
 
-  // Update the Topics section in LeftSidebar to remove "I'm Feeling Lucky"
-  const LeftSidebar = () => (
-    <div className={`hidden lg:block w-80 border-r ${themeClasses.border} ${themeClasses.sidebarBg} overflow-y-auto transition-colors duration-200`}>
+  // Update the right sidebar rendering to show exploration pairs
+  const RightSidebar = () => (
+    <div className={`hidden xl:block w-80 border-l ${themeClasses.border} ${themeClasses.sidebarBg} overflow-y-auto transition-colors duration-200`}>
       <div className="p-6">
-        {/* Library Section */}
-        <div className="mb-8">
-          <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Library</h3>
-          <div className="space-y-2">
-            {libraryConversations.map((conversation) => (
+        <h3 className={`text-lg font-semibold mb-4 ${themeClasses.textPrimary}`}>Deep Dive</h3>
+        <div className="space-y-3">
+          {isGeneratingPairs ? (
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <p className={`text-sm ${themeClasses.textSecondary}`}>Generating exploration pairs...</p>
+            </div>
+          ) : explorationPairs.length > 0 ? (
+            explorationPairs.map((pair, index) => (
               <button
-                key={conversation.id}
-                onClick={() => handleSuggestedDiscussion(conversation.title)}
-                className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
+                key={index}
+                onClick={() => handleSuggestedDiscussion(pair.question)}
+                className={`w-full text-left p-4 ${themeClasses.cardBg} rounded-lg hover:bg-blue-500/5 transition-all duration-200 group border ${themeClasses.border}`}
               >
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
-                    {conversation.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${themeClasses.textPrimary} truncate group-hover:text-blue-500 transition-colors duration-200`}>
-                      {conversation.title}
-                    </p>
-                    <p className={`text-xs ${themeClasses.textSecondary} mt-0.5 truncate`}>
-                      {conversation.preview}
-                    </p>
-                    <p className={`text-xs ${themeClasses.textTertiary} mt-1`}>
-                      {conversation.timestamp}
-                    </p>
-                  </div>
-                </div>
-                      </button>
-                  ))}
-          </div>
-              </div>
-
-        {/* Topics Section */}
-        <div>
-          <h3 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>Topics</h3>
-          <div className="space-y-3">
-            {quickTopics.map((topic) => (
-              <div
-                key={topic.id}
-                className={`rounded-lg overflow-hidden ${
-                  selectedTopic?.id === topic.id ? 'ring-2 ring-blue-500' : ''
-                }`}
-              >
-                <button
-                  onClick={() => handleTopicSelect(topic)}
-                  className={`w-full text-left p-4 ${themeClasses.hoverBg} transition-all duration-200 group`}
-                >
-                  <h4 className={`text-lg font-medium ${themeClasses.textPrimary} mb-2 group-hover:text-blue-500 transition-colors duration-200`}>
-                    {topic.title}
-                    </h4>
-                  <p className={`text-sm ${themeClasses.textSecondary} mb-3`}>
-                    {topic.preview}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {topic.relatedTopics.map((related, index) => (
-                      <span
-                        key={index}
-                        className={`text-xs px-2 py-1 ${themeClasses.chipBg} ${themeClasses.textTertiary} rounded-full`}
-                      >
-                        {related}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              </div>
-            ))}
-          </div>
+                <p className={`text-sm font-medium ${themeClasses.textPrimary} mb-2`}>
+                  {pair.invitation}
+                </p>
+                <p className={`text-sm ${themeClasses.textSecondary} group-hover:text-blue-500`}>
+                  {pair.question}
+                </p>
+              </button>
+            ))
+          ) : (
+            <p className={`text-sm ${themeClasses.textSecondary}`}>
+              Ask a question to see related exploration topics
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -907,18 +1001,26 @@ const TopicExplorer = () => {
                   <h1 className={`text-2xl font-bold ${themeClasses.accent} tracking-tight`}>
                     Spirit Wind Explorer
                   </h1>
-              </div>
+                </div>
 
-                <button
-                  onClick={toggleTheme}
-                  className={`p-2 rounded-lg ${themeClasses.hoverBg} transition-colors duration-200`}
-                >
-                  {isDarkMode ? (
-                    <Sun size={20} className="text-yellow-400" />
-                  ) : (
-                    <Moon size={20} className="text-blue-600" />
+                <div className="flex items-center space-x-4">
+                  {isAudioPlaying && (
+                    <div className={`text-sm ${themeClasses.textSecondary} flex items-center gap-2`}>
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span>{audioSources[currentAudioIndex].name}</span>
+                    </div>
                   )}
-                </button>
+                  <button
+                    onClick={toggleTheme}
+                    className={`p-2 rounded-lg ${themeClasses.hoverBg} transition-colors duration-200`}
+                  >
+                    {isDarkMode ? (
+                      <Sun size={20} className="text-yellow-400" />
+                    ) : (
+                      <Moon size={20} className="text-blue-600" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -928,7 +1030,7 @@ const TopicExplorer = () => {
           <LeftSidebar />
           {/* Main Content Area */}
           <main className="flex-1 min-w-0 flex flex-col">
-            <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8 mb-[76px]">
+            <div className="flex-1 flex flex-col h-[calc(100vh-4rem)]">
               <AnimatePresence mode="wait">
                 {isLoading ? (
                   <motion.div
@@ -957,7 +1059,7 @@ const TopicExplorer = () => {
                     </div>
                   </motion.div>
                 ) : selectedQuickTopic ? (
-                  <div className="h-[calc(100vh-8rem-76px)]">
+                  <div className="flex-1 overflow-hidden p-4">
                     {renderContent()}
                   </div>
                 ) : (
@@ -967,50 +1069,7 @@ const TopicExplorer = () => {
             </div>
           </main>
 
-          {/* Right Sidebar - Deep Dive */}
-          <div className={`hidden xl:block w-80 border-l ${themeClasses.border} ${themeClasses.sidebarBg} overflow-y-auto transition-colors duration-200`}>
-            <div className="p-6">
-              <h3 className={`text-lg font-semibold mb-4 ${themeClasses.textPrimary}`}>Deep Dive</h3>
-              <div className="space-y-3">
-                {isGeneratingPairs ? (
-                  <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                      <p className={`text-sm ${themeClasses.textSecondary}`}>
-                        Analyzing {selectedQuickTopic?.title || 'your question'} to find relevant deep dive topics...
-                      </p>
-                    </div>
-                  </div>
-                ) : explorationPairs.length > 0 ? (
-                  explorationPairs.map((pair, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestedDiscussion(pair.question)}
-                      className={`w-full text-left p-3 ${themeClasses.chipBg} rounded-lg ${themeClasses.hoverBg} transition-all duration-200 group`}
-                    >
-                      <div className="flex items-start space-x-2">
-                        <MessageSquare size={16} className="text-blue-500 mt-1 flex-shrink-0" />
-                        <div>
-                          <p className={`text-sm font-medium ${themeClasses.textPrimary} group-hover:text-blue-500 transition-colors duration-200`}>
-                            {pair.invitation}
-                          </p>
-                          <p className={`text-xs ${themeClasses.textSecondary} mt-1`}>
-                            {pair.question}
-                          </p>
-                        </div>
-                      </div>
-                  </button>
-                  ))
-                ) : (
-                  <div className={`p-4 ${themeClasses.cardBg} rounded-lg`}>
-                    <p className={`text-sm ${themeClasses.textSecondary} text-center`}>
-                      Select a topic or ask a question to explore deeper
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <RightSidebar />
         </div>
 
         {/* Follow-up Section - Only show in content view */}

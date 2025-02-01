@@ -2,28 +2,28 @@
   "version": 3,
   "middleware": {},
   "functions": {
-    "/api/ai/route": {
+    "/api/gpt4o/route": {
       "files": [
         "server/middleware-build-manifest.js",
         "server/middleware-react-loadable-manifest.js",
         "server/next-font-manifest.js",
         "server/interception-route-rewrite-manifest.js",
         "server/edge-runtime-webpack.js",
-        "server/app/api/ai/route.js"
+        "server/app/api/gpt4o/route.js"
       ],
-      "name": "app/api/ai/route",
-      "page": "/api/ai/route",
+      "name": "app/api/gpt4o/route",
+      "page": "/api/gpt4o/route",
       "matchers": [
         {
-          "regexp": "^/api/ai$",
-          "originalSource": "/api/ai"
+          "regexp": "^/api/gpt4o$",
+          "originalSource": "/api/gpt4o"
         }
       ],
       "wasm": [],
       "assets": [],
       "env": {
         "__NEXT_BUILD_ID": "development",
-        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "YfERcUE8uLpFkK6+x/KuFMtMat5LEhN0daiZPTFWze0="
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "OJQB+MmTk/NzdgSKKifh7ZAnjQ6oxawjwkKP6zuTvQM="
       }
     }
   },
