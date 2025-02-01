@@ -501,7 +501,13 @@ Make the pairs specifically about offshore wind farms and their technology, envi
   };
 
   const handleSuggestedDiscussion = async (question) => {
-    console.log('🚀 Starting new discussion:', question);
+    const startTime = Date.now();
+    console.log(`
+🎯 [Client] Starting new discussion
+📝 Question: "${question}"
+⏱️  Time: ${new Date().toISOString()}
+`);
+    
     setCurrentQuestion(question);
     setSearchHistory(prev => [...prev, { content: question, type: 'question' }]);
     
@@ -512,7 +518,7 @@ Make the pairs specifically about offshore wind farms and their technology, envi
     });
     
     setIsLoading(true);
-    setIsGeneratingPairs(true); // Start the sound when we begin loading
+    setIsGeneratingPairs(true);
     setFullResponse('');
     setDisplayedResponse('');
     setError(null);
@@ -529,7 +535,13 @@ Please provide a detailed response with clear structure using markdown formattin
 
 Focus exclusively on offshore wind farms and structure the response with clear sections.`;
 
-      console.log('📡 Connecting to streaming endpoint...');
+      console.log(`
+📤 [Client] Sending request
+📊 Stats:
+- Prompt length: ${enhancedPrompt.length} chars
+- Est. tokens: ${Math.round(enhancedPrompt.length / 4)}
+`);
+
       const response = await fetch('/api/gpt4o', {
         method: 'POST',
         headers: {
@@ -542,19 +554,29 @@ Focus exclusively on offshore wind farms and structure the response with clear s
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      console.log('✅ [Client] Connected to stream');
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let chunkCount = 0;
-      let startTime = Date.now();
+      let totalChars = 0;
       let accumulatedContent = '';
+      let lastProgressLog = Date.now();
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) {
-          console.log(`✅ Stream complete: ${chunkCount} chunks in ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          console.log(`
+🏁 [Client] Stream complete
+📊 Final Stats:
+- Duration: ${duration}s
+- Total chunks: ${chunkCount}
+- Total chars: ${totalChars}
+- Chars/sec: ${Math.round(totalChars / parseFloat(duration))}
+`);
           setIsLoading(false);
-          setIsGeneratingPairs(false); // Stop the sound when we're done
-          // Generate exploration pairs after successful response
+          setIsGeneratingPairs(false);
           generateExplorationPairs(question);
           break;
         }
@@ -572,19 +594,34 @@ Focus exclusively on offshore wind farms and structure the response with clear s
               const content = parsed.choices?.[0]?.delta?.content || '';
               if (content) {
                 chunkCount++;
-                console.log(`📝 Chunk #${chunkCount} received: ${content.length} chars`);
+                totalChars += content.length;
                 accumulatedContent += content;
-                // Update both states immediately
-                setFullResponse(accumulatedContent);
-                setDisplayedResponse(accumulatedContent);
-                setSelectedQuickTopic(current => ({
-                  ...current,
-                  content: accumulatedContent
-                }));
+                
+                // Log progress every second
+                const now = Date.now();
+                if (now - lastProgressLog >= 1000) {
+                  console.log(`
+📊 [Client] Stream progress
+- Chunks: ${chunkCount}
+- Characters: ${totalChars}
+- Current length: ${accumulatedContent.length}
+`);
+                  lastProgressLog = now;
+                }
+
+                // Update states immediately for each chunk
+                flushSync(() => {
+                  setFullResponse(accumulatedContent);
+                  setDisplayedResponse(accumulatedContent);
+                  setSelectedQuickTopic(current => ({
+                    ...current,
+                    content: accumulatedContent
+                  }));
+                });
               }
             } catch (err) {
               if (err instanceof Error && err.message !== 'Unexpected end of JSON input') {
-                console.error('❌ Error processing chunk:', err);
+                console.error('❌ [Client] Error processing chunk:', err);
               }
             }
           }
@@ -592,69 +629,176 @@ Focus exclusively on offshore wind farms and structure the response with clear s
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      console.error('❌ Stream error:', errorMessage);
+      console.error(`❌ [Client] Stream error: ${errorMessage}`);
       setError({ message: errorMessage });
       setIsLoading(false);
-      setIsGeneratingPairs(false); // Make sure to stop the sound if there's an error
+      setIsGeneratingPairs(false);
     }
   };
 
+  // Add handleFollowUpQuestion function back
   const handleFollowUpQuestion = async (question) => {
-    // Include previous context in the follow-up
-    const context = messages.map(m => `${m.role}: ${m.content}`).join('\n');
-    await handleSuggestedDiscussion(question, context);
+    const startTime = Date.now();
+    console.log(`
+🎯 [Client] Starting follow-up discussion
+📝 Question: "${question}"
+💭 Previous: "${currentQuestion}"
+⏱️  Time: ${new Date().toISOString()}
+`);
+    
+    setCurrentQuestion(question);
+    setSearchHistory(prev => [...prev, { content: question, type: 'follow-up' }]);
+    
+    setIsLoading(true);
+    setIsGeneratingPairs(true);
+    setFullResponse('');
+    setDisplayedResponse('');
+    setError(null);
+
+    try {
+      // Create a context-aware prompt
+      const enhancedPrompt = `Previous question: ${currentQuestion}
+Previous response: ${fullResponse}
+
+Follow-up question: ${question}
+
+Please provide a detailed response that builds upon the previous context. Use markdown formatting:
+- Use # for main headings
+- Use ## for subheadings
+- Use bullet points or numbered lists where appropriate
+- Include relevant examples and explanations
+- Break down complex concepts into digestible sections
+
+Focus exclusively on offshore wind farms and ensure the response connects to the previous context when relevant.`;
+
+      console.log(`
+📤 [Client] Sending follow-up request
+📊 Stats:
+- Prompt length: ${enhancedPrompt.length} chars
+- Est. tokens: ${Math.round(enhancedPrompt.length / 4)}
+`);
+
+      const response = await fetch('/api/gpt4o', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: enhancedPrompt })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log('✅ [Client] Connected to stream');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let chunkCount = 0;
+      let totalChars = 0;
+      let accumulatedContent = '';
+      let lastProgressLog = Date.now();
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          console.log(`
+🏁 [Client] Follow-up stream complete
+📊 Final Stats:
+- Duration: ${duration}s
+- Total chunks: ${chunkCount}
+- Total chars: ${totalChars}
+- Chars/sec: ${Math.round(totalChars / parseFloat(duration))}
+`);
+          setIsLoading(false);
+          setIsGeneratingPairs(false);
+          generateExplorationPairs(question);
+          break;
+        }
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(5);
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || '';
+              if (content) {
+                chunkCount++;
+                totalChars += content.length;
+                accumulatedContent += content;
+                
+                // Log progress every second
+                const now = Date.now();
+                if (now - lastProgressLog >= 1000) {
+                  console.log(`
+📊 [Client] Follow-up stream progress
+- Chunks: ${chunkCount}
+- Characters: ${totalChars}
+- Current length: ${accumulatedContent.length}
+`);
+                  lastProgressLog = now;
+                }
+
+                // Update states immediately for each chunk
+                flushSync(() => {
+                  setFullResponse(accumulatedContent);
+                  setDisplayedResponse(accumulatedContent);
+                  setSelectedQuickTopic(current => ({
+                    ...current,
+                    title: question,
+                    content: accumulatedContent
+                  }));
+                });
+              }
+            } catch (err) {
+              if (err instanceof Error && err.message !== 'Unexpected end of JSON input') {
+                console.error('❌ [Client] Error processing follow-up chunk:', err);
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      console.error(`❌ [Client] Follow-up stream error: ${errorMessage}`);
+      setError({ message: errorMessage });
+      setIsLoading(false);
+      setIsGeneratingPairs(false);
+    }
   };
-
-  // Pro tooltip content
-  const ProTooltip = () => (
-    <div className={`absolute bottom-full right-0 mb-2 w-72 ${isDarkMode ? 'bg-[#2A2C2E]' : 'bg-white'} rounded-xl p-4 shadow-lg border ${themeClasses.border} transition-all duration-200 z-50`}>
-      <div className="flex items-center space-x-2 mb-2">
-        <Sparkles className="text-blue-500" size={18} />
-        <h4 className={`font-semibold ${themeClasses.textPrimary}`}>Pro Search</h4>
-      </div>
-      <p className={`text-sm ${themeClasses.textSecondary} mb-3`}>
-        Uses AI model wind-9901 our latest model which will give you more in depth well crafted responses.
-      </p>
-      <div className={`text-xs ${themeClasses.textTertiary} mb-4`}>
-        {proSearchesLeft} searches left today
-      </div>
-      <button 
-        onClick={() => {/* Handle Pro upgrade */}}
-        className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-      >
-        Get more Pro Searches
-      </button>
-    </div>
-  );
-
-  // Pro toggle component
-  const ProToggle = () => (
-    <div className="relative">
-      <button
-        onMouseEnter={() => setShowProTooltip(true)}
-        onMouseLeave={() => setShowProTooltip(false)}
-        onClick={() => setIsPro(!isPro)}
-        className="flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-200"
-      >
-        <div className={`w-8 h-4 rounded-full ${isPro ? 'bg-blue-500' : 'bg-gray-600'} relative transition-colors duration-200`}>
-          <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform duration-200 ${isPro ? 'translate-x-4' : ''}`} />
-        </div>
-        <span className={`text-sm ${themeClasses.textSecondary}`}>Pro</span>
-      </button>
-      {showProTooltip && <ProTooltip />}
-    </div>
-  );
 
   // Update the FollowUpSection component to handle real questions
   const FollowUpSection = () => {
     const [followUpQuestion, setFollowUpQuestion] = useState('');
+    const inputRef = useRef(null);
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      if (!followUpQuestion.trim()) return;
+      if (!followUpQuestion.trim() || isLoading) return;
 
+      console.log('🔄 [Client] Submitting follow-up question:', followUpQuestion);
+      
+      // Call the handleFollowUpQuestion function with the current question
       await handleFollowUpQuestion(followUpQuestion);
+      
+      // Clear the input after submission
       setFollowUpQuestion('');
+      
+      // Focus back on the input for the next question
+      inputRef.current?.focus();
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
     };
 
     return (
@@ -666,18 +810,21 @@ Focus exclusively on offshore wind farms and structure the response with clear s
                 <MessageSquare size={18} className={themeClasses.textSecondary} />
               </div>
               <input
+                ref={inputRef}
                 type="text"
                 value={followUpQuestion}
                 onChange={(e) => setFollowUpQuestion(e.target.value)}
-                placeholder="Ask follow-up question..."
-                className={`w-full pl-12 pr-32 py-3 ${themeClasses.inputBg} border ${themeClasses.border} rounded-xl ${themeClasses.textPrimary} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a follow-up question..."
+                disabled={isLoading}
+                className={`w-full pl-12 pr-32 py-3 ${themeClasses.inputBg} border ${themeClasses.border} rounded-xl ${themeClasses.textPrimary} placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
                 <ProToggle />
                 <button 
                   type="submit"
-                  disabled={!followUpQuestion.trim() || isTyping}
-                  className={`p-1.5 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200 ${isTyping ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!followUpQuestion.trim() || isLoading}
+                  className={`p-1.5 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200 ${!followUpQuestion.trim() || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <ArrowRight size={16} className={themeClasses.textSecondary} />
                 </button>
@@ -878,67 +1025,6 @@ Focus exclusively on offshore wind farms and structure the response with clear s
     </div>
   );
 
-  // Add renderContent function here
-  const renderContent = () => {
-    if (!selectedQuickTopic) return null;
-
-    return (
-      <div className="flex flex-col h-full">
-        {/* Compact Topic Navigation Bar */}
-        <div className={`flex items-center justify-between text-sm p-4 ${themeClasses.cardBg} rounded-xl ${themeClasses.cardShadow}`}>
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 ${themeClasses.chipBg} rounded-lg`}>
-              <BookOpenIcon size={18} className="text-blue-500" />
-            </div>
-            <div>
-              <span className={`font-medium ${themeClasses.textPrimary}`}>{selectedQuickTopic.title}</span>
-              <p className={`text-xs ${themeClasses.textSecondary} mt-0.5`}>AI-powered response</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setSelectedQuickTopic(null)}
-            className={`p-2 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200`}
-          >
-            <X size={16} className={themeClasses.textSecondary} />
-          </button>
-        </div>
-
-        {/* Loading State - Show progress */}
-        {isLoading && !displayedResponse && (
-          <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-lg animate-pulse">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-              <p className={`text-sm ${themeClasses.textSecondary}`}>
-                Generating response...
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto mt-4">
-          <div className={`${cardStyle} h-full`}>
-            <div className="max-w-[680px] mx-auto">
-              <div className={`${themeClasses.textPrimary} text-[17px] leading-[1.6]`}>
-                <article className="prose dark:prose-invert max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {displayedResponse}
-                  </ReactMarkdown>
-                  {isLoading && displayedResponse && (
-                    <div className="flex items-center gap-2 text-sm text-blue-500">
-                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                      <span>Generating more...</span>
-                    </div>
-                  )}
-                </article>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   // Update the right sidebar rendering to show exploration pairs
   const RightSidebar = () => (
     <div className={`hidden xl:block w-80 border-l ${themeClasses.border} ${themeClasses.sidebarBg} overflow-y-auto transition-colors duration-200`}>
@@ -948,7 +1034,9 @@ Focus exclusively on offshore wind farms and structure the response with clear s
           {isGeneratingPairs ? (
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <p className={`text-sm ${themeClasses.textSecondary}`}>Generating exploration pairs...</p>
+              <p className={`text-sm ${themeClasses.textSecondary}`}>
+                Discovering related topics to explore...
+              </p>
             </div>
           ) : explorationPairs.length > 0 ? (
             explorationPairs.map((pair, index) => (
@@ -967,7 +1055,7 @@ Focus exclusively on offshore wind farms and structure the response with clear s
             ))
           ) : (
             <p className={`text-sm ${themeClasses.textSecondary}`}>
-              Ask a question to see related exploration topics
+              Ask a question to discover related topics
             </p>
           )}
         </div>
@@ -1032,35 +1120,59 @@ Focus exclusively on offshore wind farms and structure the response with clear s
           <main className="flex-1 min-w-0 flex flex-col">
             <div className="flex-1 flex flex-col h-[calc(100vh-4rem)]">
               <AnimatePresence mode="wait">
-                {isLoading ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center py-20 space-y-6"
-                  >
-                    <div className={`${cardStyle} max-w-lg w-full`}>
-                      <div className="flex flex-col space-y-4">
+                {selectedQuickTopic ? (
+                  <div className="flex-1 overflow-hidden p-4">
+                    <div className="flex flex-col h-full">
+                      {/* Compact Topic Navigation Bar */}
+                      <div className={`flex items-center justify-between text-sm p-4 ${themeClasses.cardBg} rounded-xl ${themeClasses.cardShadow}`}>
                         <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                          <p className={`${themeClasses.textPrimary}`}>
-                            {selectedQuickTopic ? `Analyzing "${selectedQuickTopic.title}"...` : 'Preparing response...'}
-                          </p>
-                        </div>
-                        {isGeneratingPairs && (
-                          <div className="flex items-center space-x-3">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                            <p className={`${themeClasses.textSecondary}`}>
-                              Generating deep dive topics about {selectedQuickTopic?.title || 'this topic'}...
-                            </p>
+                          <div className={`p-2 ${themeClasses.chipBg} rounded-lg`}>
+                            <BookOpenIcon size={18} className="text-blue-500" />
                           </div>
-                        )}
+                          <div>
+                            <span className={`font-medium ${themeClasses.textPrimary}`}>{selectedQuickTopic.title}</span>
+                            <p className={`text-xs ${themeClasses.textSecondary} mt-0.5`}>AI-powered response</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedQuickTopic(null)}
+                          className={`p-2 ${themeClasses.hoverBg} rounded-lg transition-colors duration-200`}
+                        >
+                          <X size={16} className={themeClasses.textSecondary} />
+                        </button>
+                      </div>
+
+                      {/* Content Area with Real-time Streaming */}
+                      <div className="flex-1 overflow-y-auto mt-4 pb-32">
+                        <div className={`${cardStyle} h-full`}>
+                          <div className="max-w-[680px] mx-auto">
+                            {isLoading && !displayedResponse && (
+                              <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-lg animate-pulse mb-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                  <p className={`text-sm ${themeClasses.textSecondary}`}>
+                                    Generating response...
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                            <div className={`${themeClasses.textPrimary} text-[17px] leading-[1.6]`}>
+                              <article className="prose dark:prose-invert max-w-none">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {displayedResponse || ''}
+                                </ReactMarkdown>
+                                {isLoading && (
+                                  <div className="flex items-center gap-2 text-sm text-blue-500 mt-4">
+                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                                    <span>Generating more...</span>
+                                  </div>
+                                )}
+                              </article>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                ) : selectedQuickTopic ? (
-                  <div className="flex-1 overflow-hidden p-4">
-                    {renderContent()}
                   </div>
                 ) : (
                   <LandingSection />
